@@ -135,6 +135,7 @@ EOF
 # Server Configuration
 PORT=3000
 HOST=localhost
+MCP_PATH=/mcp
 
 # Logging Level (debug, info, warn, error)
 LOG_LEVEL=info

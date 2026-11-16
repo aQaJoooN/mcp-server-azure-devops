@@ -35,12 +35,15 @@ The server is organized into feature-specific modules:
 ```
 src/
  └── features/
+     ├── environments/      (list_environments)
+     ├── libraries/         (list_libraries)
      ├── organizations/
      ├── pipelines/
      ├── projects/
      ├── pull-requests/
      ├── repositories/
      ├── search/
+     ├── service-connections/ (list_service_connections)
      ├── users/
      ├── wikis/
      └── work-items/
@@ -65,13 +68,31 @@ When adding a new feature or tool:
 npm ci
 cp .env.example .env   # then edit values
 
-# option A: run compiled output (matches what gets published)
+# option A: stdio transport (default, for AI assistant integrations)
 npm run build
 npm start
 
-# option B: dev mode (auto-reload)
+# option B: HTTP transport (for Docker / JSON-RPC testing)
+npm run build
+npm run start:http       # listens on PORT (default 3000), path MCP_PATH (default /mcp)
+
+# option C: dev mode (auto-reload, stdio)
 npm run dev
 ```
+
+### Running with Docker
+
+```bash
+docker build -t mcp-server-azure-devops:local .
+docker run -p 8888:3000 \
+  -e AZURE_DEVOPS_ORG_URL="https://dev.azure.com/my-org" \
+  -e AZURE_DEVOPS_AUTH_METHOD=pat \
+  -e AZURE_DEVOPS_PAT="<token>" \
+  mcp-server-azure-devops:local
+```
+
+Health check: `GET http://localhost:8888/healthz`
+MCP endpoint: `POST http://localhost:8888/mcp` (JSON-RPC, `Accept: application/json, text/event-stream`)
 
 ## Testing
 

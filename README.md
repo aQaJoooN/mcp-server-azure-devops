@@ -65,7 +65,14 @@ From a checkout of this repository:
 npm ci
 cp .env.example .env   # then edit values
 npm run build
-npm start              # runs: node dist/index.js
+npm start              # runs: node dist/index.js  (stdio transport)
+```
+
+For the HTTP transport (Docker-compatible):
+
+```bash
+npm run build
+npm run start:http     # runs: node dist/http-server.js  (Streamable-HTTP on PORT, default 3000)
 ```
 
 For iterative development (auto-reload):
@@ -73,6 +80,34 @@ For iterative development (auto-reload):
 ```bash
 npm run dev            # runs src/index.ts via tsx watch
 ```
+
+### Running with Docker
+
+```bash
+# Build the image
+docker build -t mcp-server-azure-devops:local .
+
+# Run — PAT auth, on-prem example
+docker run -p 8888:3000 \
+  -e AZURE_DEVOPS_ORG_URL="https://your-server/tfs/YourCollection" \
+  -e AZURE_DEVOPS_AUTH_METHOD=pat \
+  -e AZURE_DEVOPS_PAT="<token>" \
+  -e AZURE_DEVOPS_DEFAULT_PROJECT="YourProject" \
+  mcp-server-azure-devops:local
+
+# Health check
+curl http://localhost:8888/healthz
+
+# JSON-RPC test call
+curl -s -X POST http://localhost:8888/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+> **On-prem URL format**: `AZURE_DEVOPS_ORG_URL` must be the **collection** URL only —
+> `https://host/tfs/Collection`. The project name goes separately in `AZURE_DEVOPS_DEFAULT_PROJECT`.
+> Do **not** include the project in the org URL.
 
 ### Usage with Claude Desktop/Cursor AI
 
@@ -210,6 +245,9 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 - `get_repository_details`: Get detailed information about a repository including statistics and refs
 - `get_file_content`: Get content of a file or directory from a repository
 - `get_repository_tree`: List a repository's file tree from any path and depth
+- `list_branches`: List branches in a repository with optional prefix filter
+- `list_tags`: List tags in a repository with optional prefix filter
+- `list_commits`: List recent commits on a branch with file-level diff content
 - `create_branch`: Create a new branch from an existing one
 - `create_commit`: Commit multiple file changes to a branch using unified diffs or search/replace instructions
 
@@ -238,8 +276,17 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 - `get_pipeline_run`: Get detailed run information and artifact summaries
 - `download_pipeline_artifact`: Download a single artifact file as text
 - `pipeline_timeline`: Retrieve the stage and job timeline for a run
-- `get_pipeline_log`: Retrieve raw or JSON-formatted log content
+- `get_pipeline_log`: Retrieve raw or JSON-formatted log content by logId
+- `get_pipeline_run_yaml`: Get the fully-expanded YAML that was executed for a run
+- `get_pipeline_run_sources`: Get the source repositories, branches, and commit versions used in a run
+- `get_pipeline_run_stage_tasks`: Get the task hierarchy (stage → job → task) for a run, with logIds for each task
 - `trigger_pipeline`: Trigger a pipeline run with customizable parameters
+
+### Project Resource Tools
+
+- `list_environments`: List deployment environments in a project (approval gates, VMs, Kubernetes)
+- `list_libraries`: List variable groups (Libraries) in a project
+- `list_service_connections`: List service connections (endpoints) used by pipelines in a project
 
 ### Wiki Tools
 

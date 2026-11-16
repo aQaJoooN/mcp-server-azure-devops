@@ -24,13 +24,22 @@
 - Provides MCP tools to interact with Azure DevOps features including, but not limited to:
     - Organizations
     - Projects (list, get, get details)
-    - Repositories (list, get, get content, get tree)
+    - Repositories (list, get, get content, get tree, list branches, list tags, list commits)
     - Work Items (list, get, create, update, manage links)
     - Pull Requests (list, get, create, update, add/get comments)
-    - Pipelines (list, trigger)
+    - Pipelines (list, trigger, runs, timeline, logs, YAML, sources, stage tasks)
+    - Environments (list deployment environments)
+    - Libraries / Variable Groups (list)
+    - Service Connections (list)
     - Search (code, wiki, work items)
     - Users (get current user)
-    - Wikis (list, get page, create, update page)
+    - Wikis (list, get page, create, update page, list pages)
+
+## 2. Project Architecture
+
+### Transports
+- **stdio** (`src/index.ts`): default; used by Claude Desktop, Cursor, and other local AI clients.
+- **Streamable-HTTP** (`src/http-server.ts`): exposes `POST /mcp` for JSON-RPC over HTTP; used when running in Docker or testing with curl. Health endpoint at `GET /healthz`. Configured via `PORT` (default 3000) and `MCP_PATH` (default `/mcp`).
 
 ## 2. Project Architecture
 
@@ -40,30 +49,13 @@
     - [`tsconfig.json`](tsconfig.json:0): TypeScript compiler configuration. **ADHERE** to its settings.
     - [`.oxlintrc.json`](.oxlintrc.json:0): Oxlint configuration for code linting. **ADHERE** to its rules.
     - [`README.md`](README.md:0): General project information.
-    - `setup_env.sh`: Shell script for environment setup.
-    - `CHANGELOG.md` (if present): Tracks changes between versions.
+    - `setup_env.sh`: Shell script for environment setup (interactive, cloud-only).
+    - `Dockerfile` / `docker-compose.yml`: Container build and run configuration for the HTTP transport.
+    - `CHANGELOG.md`: Tracks changes between versions.
 - **`src/`**: Contains all TypeScript source code.
-    - **`src/features/`**: Core application logic. Each subdirectory represents a distinct Azure DevOps feature set (e.g., `projects`, `repositories`).
-        - `src/features/[feature-name]/`: Contains all files related to a specific feature.
-            - `src/features/[feature-name]/index.ts`: Main export file for the feature. Exports request handlers (`isFeatureRequest`, `handleFeatureRequest`), tool definitions array (`featureTools`), schemas, types, and individual tool implementation functions. **MODIFY** this file when adding new tools or functionalities to the feature.
-            - `src/features/[feature-name]/schemas.ts`: Defines Zod input/output schemas for all tools within this feature. **DEFINE** new schemas here.
-            - `src/features/[feature-name]/tool-definitions.ts`: Defines MCP tools for the feature using `@modelcontextprotocol/sdk` and `zodToJsonSchema`. **ADD** new tool definitions here.
-            - `src/features/[feature-name]/types.ts`: Contains TypeScript type definitions specific to this feature. **DEFINE** feature-specific types here.
-            - `src/features/[feature-name]/[tool-name]/`: Subdirectory for a specific tool/action within the feature.
-                - `src/features/[feature-name]/[tool-name]/feature.ts`: Implements the core logic for the specific tool (e.g., API calls, data transformation). **IMPLEMENT** tool logic here.
-                - `src/features/[feature-name]/[tool-name]/index.ts`: Exports the `feature.ts` logic and potentially tool-specific schemas/types if not in the parent feature files.
-                - `src/features/[feature-name]/[tool-name]/schema.ts` (optional, often re-exports from feature-level `schemas.ts`): Defines or re-exports Zod schemas for this specific tool.
-        - `src/features/organizations/`, `src/features/pipelines/`, `src/features/projects/`, `src/features/pull-requests/`, `src/features/repositories/`, `src/features/search/`, `src/features/users/`, `src/features/wikis/`, `src/features/work-items/`: Existing feature modules. **REFER** to these for patterns.
-    - **`src/shared/`**: Contains shared modules and utilities used across features.
-        - `src/shared/api/`: Azure DevOps API client setup (e.g., `client.ts`).
-        - `src/shared/auth/`: Authentication logic for Azure DevOps (e.g., `auth-factory.ts`, `client-factory.ts`). **USE** these factories; DO NOT implement custom auth.
-        - `src/shared/config/`: Configuration management (e.g., `version.ts`).
-        - `src/shared/errors/`: Shared error handling classes and utilities (e.g., `azure-devops-errors.ts`, `handle-request-error.ts`). **USE** these for consistent error handling.
-        - `src/shared/types/`: Global TypeScript type definitions (e.g., `config.ts`, `request-handler.ts`, `tool-definition.ts`).
-    - **`src/utils/`**: General utility functions.
-        - `src/utils/environment.ts`: Provides default values for environment variables (e.g., `defaultProject`, `defaultOrg`).
-    - [`src/index.ts`](src/index.ts:1): Main application entry point. Handles environment variable loading and server initialization. **Exports** server components.
-    - [`src/server.ts`](src/server.ts:1): MCP server core logic. Initializes the server, registers all tool handlers from features, and sets up request routing. **MODIFY** this file to register new feature modules (their `isFeatureRequest` and `handleFeatureRequest` handlers, and `featureTools` array).
+    - [`src/index.ts`](src/index.ts:1): **stdio** entry point. Handles environment variable loading and server initialization.
+    - [`src/http-server.ts`](src/http-server.ts:1): **Streamable-HTTP** entry point. Exposes `POST /mcp` and `GET /healthz`. Use for Docker / JSON-RPC testing.
+    - [`src/server.ts`](src/server.ts:1): MCP server core logic. Registers all feature modules.
 - **`docs/`**: Currently empty. If documentation is added, **MAINTAIN** it in sync with code changes.
 - **`project-management/`**: Contains project planning and design documents. **REFER** to `architecture-guide.md` for high-level design.
 - **`tests/`**: Directory for global test setup or utilities if any. Most tests are co-located with source files (e.g., `*.spec.unit.ts`, `*.spec.int.ts`, `*.spec.e2e.ts`).
@@ -160,11 +152,11 @@
     - Primarily abstracted via `AzureDevOpsClient` in `src/shared/auth/`. PREFER using this abstraction.
 - **`zod`**:
     - USE for all input/output schema definition and validation.
-    - DEFINE schemas in `src/features/[feature-name]/schemas.ts`.
-    - USE `z.object({...})`, `z.string()`, `z.boolean()`, etc.
+    - DEFINE schemas in `src/features/[feature-name]/schemas.ts` or in per-tool `schema.ts` files.
     - USE `.optional()`, `.default()`, `.describe()` for schema fields.
-- **`zod-to-json-schema`**:
-    - USE to convert Zod schemas to JSON schemas for MCP `inputSchema` in `tool-definitions.ts`.
+- **`toJsonSchema` (from `src/shared/utils/to-json-schema`)**:
+    - USE `toJsonSchema(schema)` to convert Zod schemas to JSON Schema for MCP `inputSchema` in `tool-definitions.ts`.
+    - DO NOT use `zod-to-json-schema` directly — use the shared wrapper.
 - **`dotenv`**:
     - Used in [`src/index.ts`](src/index.ts:1) to load environment variables from a `.env` file.
 - **Jest**:
@@ -193,8 +185,9 @@
 
 ### NPM Scripts (from [`package.json`](package.json:1))
 - `build`: `tsc` (Compiles TypeScript to `dist/`).
-- `dev`: `tsx watch src/index.ts` (Runs server in development with auto-restart).
-- `start`: `node dist/index.js` (Runs compiled server).
+- `dev`: `tsx watch src/index.ts` (Runs stdio server in development with auto-restart).
+- `start`: `node dist/index.js` (Runs compiled stdio server).
+- `start:http`: `node dist/http-server.js` (Runs compiled HTTP server on `PORT`, default 3000).
 - `inspector`: `npm run build && npx @modelcontextprotocol/inspector node dist/index.js` (Runs server with MCP Inspector).
 - `test:unit`, `test:int`, `test:e2e`, `test`: Run respective test suites.
 - `lint`, `lint:fix`: Run Oxlint (`lint:fix` applies lint fixes only; run `format` separately).

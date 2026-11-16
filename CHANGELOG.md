@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [Unreleased]
+
+### Features
+
+* **docker**: add Streamable-HTTP transport (`src/http-server.ts`) and multi-stage `Dockerfile` so the server can run as a container and be tested via raw JSON-RPC ([`32c4123`](../../commit/32c4123))
+* **repositories**: add `list_branches` tool — list branches in a repo with optional substring filter ([`1910ef5`](../../commit/1910ef5))
+* **repositories**: add `list_tags` tool — list tags in a repo with optional substring filter ([`1910ef5`](../../commit/1910ef5))
+* **pipelines**: add `get_pipeline_run_yaml` — retrieve the fully-expanded YAML of an executed run ([`96673ed`](../../commit/96673ed))
+* **pipelines**: add `get_pipeline_run_sources` — repositories, branches, and commit versions used in a run ([`96673ed`](../../commit/96673ed))
+* **pipelines**: add `get_pipeline_run_stage_tasks` — stage → job → task hierarchy with `logId` per task ([`96673ed`](../../commit/96673ed))
+* **environments**: add `list_environments` — list deployment environments in a project ([`95f6f1d`](../../commit/95f6f1d))
+* **libraries**: add `list_libraries` — list variable groups (Libraries) in a project ([`95f6f1d`](../../commit/95f6f1d))
+* **service-connections**: add `list_service_connections` — list service endpoints used by pipelines ([`95f6f1d`](../../commit/95f6f1d))
+
 ## [0.1.54](https://github.com/Tiberriver256/mcp-server-azure-devops/compare/mcp-server-azure-devops-v0.1.53...mcp-server-azure-devops-v0.1.54) (2026-11-02)
 
 
