@@ -167,8 +167,24 @@ export const handlePipelinesRequest: RequestHandler = async (
         ...args,
         projectId: args.projectId ?? defaultProject,
       });
+      // Format as readable text with all resolved files
+      let output = `# Pipeline YAML Resolution\n`;
+      output += `# Run ID: ${result.runId}\n`;
+      if (result.pipelineId) output += `# Pipeline ID: ${result.pipelineId}\n`;
+      output += `# Pipeline Path: ${result.pipelinePath}\n`;
+      output += `# Files Resolved: ${result.files.length}\n`;
+      output += `\n`;
+      for (let i = 0; i < result.files.length; i++) {
+        const f = result.files[i];
+        output += `\n${'='.repeat(80)}\n`;
+        output += `# File ${i + 1}/${result.files.length}: ${f.label}\n`;
+        output += `# Repo: ${f.repositoryName} | Ref: ${f.ref} | Path: ${f.path}\n`;
+        output += `${'='.repeat(80)}\n`;
+        output += f.content;
+        if (!f.content.endsWith('\n')) output += '\n';
+      }
       return {
-        content: [{ type: 'text', text: result }],
+        content: [{ type: 'text', text: output }],
       };
     }
     case 'get_pipeline_run_sources': {

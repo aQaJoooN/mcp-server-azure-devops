@@ -10,10 +10,13 @@ export const GetPipelineRunYamlSchema = z.object({
     .number()
     .int()
     .min(1)
-    .describe('The pipeline numeric ID'),
+    .optional()
+    .describe(
+      'The pipeline numeric ID. If omitted, the runId is used to look up the build definition.',
+    ),
   runId: z
     .number()
     .int()
     .min(1)
-    .describe('The pipeline run ID'),
+    .describe('The pipeline run / build ID'),
 });
