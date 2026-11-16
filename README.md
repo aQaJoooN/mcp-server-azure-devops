@@ -4,7 +4,7 @@ A Model Context Protocol (MCP) server implementation for Azure DevOps, allowing 
 
 > **Looking for the official server?** Microsoft maintains a product-supported Azure DevOps MCP at [microsoft/azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp). If you use Azure DevOps Services (cloud), start there.
 >
-> This community server remains a good fit when you need **Azure DevOps Server (on-premises)** support — especially older versions that may not work with Microsoft's MCP — or features not yet available in the official server. See [Discussion #237](https://github.com/Tiberriver256/mcp-server-azure-devops/discussions/237) for more context. See [ROADMAP.md](./ROADMAP.md) for where this server differentiates and what is planned.
+> This community server remains a good fit when you need **Azure DevOps Server (on-premises)** support — especially older versions that may not work with Microsoft's MCP — or features not yet available in the official server. See [Discussion #237](https://github.com/aQaJoooN/mcp-server-azure-devops/discussions/237) for more context. See [ROADMAP.md](./ROADMAP.md) for where this server differentiates and what is planned.
 
 ## Overview
 
@@ -44,7 +44,7 @@ The server uses a feature-based architecture where each feature area (like work-
 - Node.js (v16+)
 - npm or yarn
 - Azure DevOps account with appropriate access
-- Authentication credentials (see [Authentication Guide](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/authentication.md) for details):
+- Authentication credentials (see [Authentication Guide](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md) for details):
   - Personal Access Token (PAT), or
   - Azure Identity credentials, or
   - Azure CLI login
@@ -54,7 +54,7 @@ The server uses a feature-based architecture where each feature area (like work-
 If you just want to run the **published** server package, you **do not** need to clone or build this repository:
 
 ```bash
-npx -y @tiberriver256/mcp-server-azure-devops
+npx -y @aqajooon/mcp-server-azure-devops
 ```
 
 ### Running locally (from source)
@@ -122,7 +122,7 @@ Be sure you are logged in to Azure CLI with `az login` then add the following:
   "mcpServers": {
     "azureDevOps": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@aqajooon/mcp-server-azure-devops"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/your-organization",
         "AZURE_DEVOPS_AUTH_METHOD": "azure-identity",
@@ -140,7 +140,7 @@ Be sure you are logged in to Azure CLI with `az login` then add the following:
   "mcpServers": {
     "azureDevOps": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@aqajooon/mcp-server-azure-devops"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/your-organization",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
@@ -159,7 +159,7 @@ Azure DevOps Server (on-prem) requires PAT authentication. Example:
   "mcpServers": {
     "azureDevOps": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@aqajooon/mcp-server-azure-devops"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://server:8080/tfs/DefaultCollection",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
@@ -171,11 +171,11 @@ Azure DevOps Server (on-prem) requires PAT authentication. Example:
 }
 ```
 
-For detailed configuration instructions and more authentication options, see the [Authentication Guide](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/authentication.md).
+For detailed configuration instructions and more authentication options, see the [Authentication Guide](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md).
 
 ## Authentication Methods
 
-This server supports multiple authentication methods for connecting to Azure DevOps APIs. For detailed setup instructions, configuration examples, and troubleshooting tips, see the [Authentication Guide](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/authentication.md).
+This server supports multiple authentication methods for connecting to Azure DevOps APIs. For detailed setup instructions, configuration examples, and troubleshooting tips, see the [Authentication Guide](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md).
 
 ### Supported Authentication Methods
 
@@ -183,13 +183,13 @@ This server supports multiple authentication methods for connecting to Azure Dev
 2. **Azure Identity (DefaultAzureCredential)** - Flexible authentication using the Azure Identity SDK
 3. **Azure CLI** - Authentication using your Azure CLI login
 
-Example configuration files for each authentication method are available in the [examples directory](https://github.com/tiberriver256/mcp-server-azure-devops/tree/main/docs/examples).
+Example configuration files for each authentication method are available in the [examples directory](https://github.com/aQaJoooN/mcp-server-azure-devops/tree/main/docs/examples).
 
 Azure DevOps Server (on-prem) supports PAT authentication only. Azure Identity and Azure CLI are supported for Azure DevOps Services.
 
 ## Environment Variables
 
-For a complete list of environment variables and their descriptions, see the [Authentication Guide](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/authentication.md#configuration-reference).
+For a complete list of environment variables and their descriptions, see the [Authentication Guide](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md#configuration-reference).
 
 Key environment variables include:
 
@@ -199,7 +199,7 @@ Key environment variables include:
 | `AZURE_DEVOPS_ORG_URL`         | Full URL to your Azure DevOps organization or Server collection (e.g., `https://server:8080/tfs/DefaultCollection`) | Yes                          | -                |
 | `AZURE_DEVOPS_PAT`             | Personal Access Token (for PAT auth)                                               | Only with PAT auth           | -                |
 | `AZURE_DEVOPS_DEFAULT_PROJECT` | Default project if none specified                                                  | No                           | -                |
-| `AZURE_DEVOPS_API_VERSION`     | REST api-version for the tools that call the REST API directly ([per-release values](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/authentication.md#rest-api-version)) | No                           | `7.1`            |
+| `AZURE_DEVOPS_API_VERSION`     | REST api-version for the tools that call the REST API directly ([per-release values](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md#rest-api-version)) | No                           | `7.1`            |
 | `AZURE_TENANT_ID`              | Azure AD tenant ID (for service principals)                                        | Only with service principals | -                |
 | `AZURE_CLIENT_ID`              | Azure AD application ID (for service principals)                                   | Only with service principals | -                |
 | `AZURE_CLIENT_SECRET`          | Azure AD client secret (for service principals)                                    | Only with service principals | -                |
@@ -207,7 +207,7 @@ Key environment variables include:
 
 ## Troubleshooting Authentication
 
-For detailed troubleshooting information for each authentication method, see the [Authentication Guide](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/authentication.md#troubleshooting-authentication-issues).
+For detailed troubleshooting information for each authentication method, see the [Authentication Guide](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md#troubleshooting-authentication-issues).
 
 Common issues include:
 
@@ -218,7 +218,7 @@ Common issues include:
 
 ## Authentication Implementation Details
 
-For technical details about how authentication is implemented in the Azure DevOps MCP server, see the [Authentication Guide](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/authentication.md) and the source code in the `src/auth` directory.
+For technical details about how authentication is implemented in the Azure DevOps MCP server, see the [Authentication Guide](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md) and the source code in the `src/auth` directory.
 
 ## Available Tools
 
@@ -295,24 +295,24 @@ The Azure DevOps MCP server provides a variety of tools for interacting with Azu
 
 ### Pull Request Tools
 
-- [`create_pull_request`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#create_pull_request) - Create a new pull request
-- [`get_pull_request`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request) - Get a pull request by ID
-- [`list_pull_requests`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#list_pull_requests) - List pull requests in a repository
-- [`add_pull_request_comment`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#add_pull_request_comment) - Add a comment to a pull request
-- [`get_pull_request_comments`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
-- [`update_pull_request`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
-- [`get_pull_request_changes`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_changes) - List changes in a pull request and policy evaluation status
-- [`get_pull_request_checks`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_checks) - Summarize status checks, policy evaluations, and their related pipelines
+- [`create_pull_request`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#create_pull_request) - Create a new pull request
+- [`get_pull_request`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request) - Get a pull request by ID
+- [`list_pull_requests`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#list_pull_requests) - List pull requests in a repository
+- [`add_pull_request_comment`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#add_pull_request_comment) - Add a comment to a pull request
+- [`get_pull_request_comments`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
+- [`update_pull_request`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
+- [`get_pull_request_changes`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_changes) - List changes in a pull request and policy evaluation status
+- [`get_pull_request_checks`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_checks) - Summarize status checks, policy evaluations, and their related pipelines
 
-For comprehensive documentation on all tools, see the [Tools Documentation](https://github.com/tiberriver256/mcp-server-azure-devops/tree/main/docs/tools).
+For comprehensive documentation on all tools, see the [Tools Documentation](https://github.com/aQaJoooN/mcp-server-azure-devops/tree/main/docs/tools).
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/CONTRIBUTING.md) for contribution guidelines.
+Contributions are welcome! Please see [CONTRIBUTING.md](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/CONTRIBUTING.md) for contribution guidelines.
 
 ## Star History
 
-[![Star History Chart](https://star-history.dera.page/svg?repos=tiberriver256/mcp-server-azure-devops&type=Date)](https://star-history.dera.page/#tiberriver256/mcp-server-azure-devops&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=aQaJoooN/mcp-server-azure-devops&type=Date)](https://star-history.dera.page/#aQaJoooN/mcp-server-azure-devops&Date)
 
 ## License
 

@@ -17,7 +17,7 @@ FROM node:22-alpine AS runtime
 
 LABEL org.opencontainers.image.title="Azure DevOps MCP Server"
 LABEL org.opencontainers.image.description="Model Context Protocol server for Azure DevOps"
-LABEL org.opencontainers.image.source="https://github.com/Tiberriver256/mcp-server-azure-devops"
+LABEL org.opencontainers.image.source="https://github.com/aQaJoooN/mcp-server-azure-devops"
 
 WORKDIR /app
 
