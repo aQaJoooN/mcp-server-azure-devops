@@ -10,6 +10,9 @@ export * from './download-pipeline-artifact';
 export * from './pipeline-timeline';
 export * from './get-pipeline-log';
 export * from './trigger-pipeline';
+export * from './get-pipeline-run-yaml';
+export * from './get-pipeline-run-sources';
+export * from './get-pipeline-run-stage-tasks';
 
 // Export tool definitions
 export * from './tool-definitions';
@@ -36,6 +39,12 @@ import { downloadPipelineArtifact } from './download-pipeline-artifact';
 import { getPipelineTimeline } from './pipeline-timeline';
 import { getPipelineLog } from './get-pipeline-log';
 import { triggerPipeline } from './trigger-pipeline';
+import { GetPipelineRunYamlSchema } from './get-pipeline-run-yaml/schema';
+import { getPipelineRunYaml } from './get-pipeline-run-yaml/feature';
+import { GetPipelineRunSourcesSchema } from './get-pipeline-run-sources/schema';
+import { getPipelineRunSources } from './get-pipeline-run-sources/feature';
+import { GetPipelineRunStageTasksSchema } from './get-pipeline-run-stage-tasks/schema';
+import { getPipelineRunStageTasks } from './get-pipeline-run-stage-tasks/feature';
 import { defaultProject } from '../../utils/environment';
 
 /**
@@ -54,6 +63,9 @@ export const isPipelinesRequest: RequestIdentifier = (
     'pipeline_timeline',
     'get_pipeline_log',
     'trigger_pipeline',
+    'get_pipeline_run_yaml',
+    'get_pipeline_run_sources',
+    'get_pipeline_run_stage_tasks',
   ].includes(toolName);
 };
 
@@ -142,6 +154,38 @@ export const handlePipelinesRequest: RequestHandler = async (
     case 'trigger_pipeline': {
       const args = TriggerPipelineSchema.parse(request.params.arguments);
       const result = await triggerPipeline(connection, {
+        ...args,
+        projectId: args.projectId ?? defaultProject,
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_pipeline_run_yaml': {
+      const args = GetPipelineRunYamlSchema.parse(request.params.arguments);
+      const result = await getPipelineRunYaml(connection, {
+        ...args,
+        projectId: args.projectId ?? defaultProject,
+      });
+      return {
+        content: [{ type: 'text', text: result }],
+      };
+    }
+    case 'get_pipeline_run_sources': {
+      const args = GetPipelineRunSourcesSchema.parse(request.params.arguments);
+      const result = await getPipelineRunSources(connection, {
+        ...args,
+        projectId: args.projectId ?? defaultProject,
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_pipeline_run_stage_tasks': {
+      const args = GetPipelineRunStageTasksSchema.parse(
+        request.params.arguments,
+      );
+      const result = await getPipelineRunStageTasks(connection, {
         ...args,
         projectId: args.projectId ?? defaultProject,
       });

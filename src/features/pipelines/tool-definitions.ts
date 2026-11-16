@@ -8,6 +8,9 @@ import { DownloadPipelineArtifactSchema } from './download-pipeline-artifact/sch
 import { GetPipelineTimelineSchema } from './pipeline-timeline/schema';
 import { GetPipelineLogSchema } from './get-pipeline-log/schema';
 import { TriggerPipelineSchema } from './trigger-pipeline/schema';
+import { GetPipelineRunYamlSchema } from './get-pipeline-run-yaml/schema';
+import { GetPipelineRunSourcesSchema } from './get-pipeline-run-sources/schema';
+import { GetPipelineRunStageTasksSchema } from './get-pipeline-run-stage-tasks/schema';
 
 /**
  * List of pipelines tools
@@ -62,6 +65,27 @@ export const pipelinesTools: ToolDefinition[] = [
     name: 'trigger_pipeline',
     description: 'Trigger a pipeline run',
     inputSchema: toJsonSchema(TriggerPipelineSchema),
+    mcp_enabled: true,
+  },
+  {
+    name: 'get_pipeline_run_yaml',
+    description:
+      'Get the final expanded YAML of a pipeline run (the YAML that was actually executed, after template expansion)',
+    inputSchema: toJsonSchema(GetPipelineRunYamlSchema),
+    mcp_enabled: true,
+  },
+  {
+    name: 'get_pipeline_run_sources',
+    description:
+      'Get the source repositories and their versions/branches that were used in a specific pipeline run',
+    inputSchema: toJsonSchema(GetPipelineRunSourcesSchema),
+    mcp_enabled: true,
+  },
+  {
+    name: 'get_pipeline_run_stage_tasks',
+    description:
+      'Get the tasks (steps) for each job within each stage of a pipeline run, with optional stage/job name filters. Returns logId for each task so you can fetch logs with get_pipeline_log.',
+    inputSchema: toJsonSchema(GetPipelineRunStageTasksSchema),
     mcp_enabled: true,
   },
 ];
