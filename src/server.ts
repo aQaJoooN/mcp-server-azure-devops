@@ -73,6 +73,24 @@ import {
   handleWikisRequest,
 } from './features/wikis';
 
+import {
+  environmentsTools,
+  isEnvironmentsRequest,
+  handleEnvironmentsRequest,
+} from './features/environments';
+
+import {
+  librariesTools,
+  isLibrariesRequest,
+  handleLibrariesRequest,
+} from './features/libraries';
+
+import {
+  serviceConnectionsTools,
+  isServiceConnectionsRequest,
+  handleServiceConnectionsRequest,
+} from './features/service-connections';
+
 // Create a safe console logging function that won't interfere with MCP protocol
 function safeLog(message: string) {
   process.stderr.write(`${message}\n`);
@@ -120,6 +138,9 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
       ...pullRequestsTools,
       ...pipelinesTools,
       ...wikisTools,
+      ...environmentsTools,
+      ...librariesTools,
+      ...serviceConnectionsTools,
     ];
 
     return { tools };
@@ -328,6 +349,18 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
 
       if (isWikisRequest(request)) {
         return await handleWikisRequest(connection, request);
+      }
+
+      if (isEnvironmentsRequest(request)) {
+        return await handleEnvironmentsRequest(connection, request);
+      }
+
+      if (isLibrariesRequest(request)) {
+        return await handleLibrariesRequest(connection, request);
+      }
+
+      if (isServiceConnectionsRequest(request)) {
+        return await handleServiceConnectionsRequest(connection, request);
       }
 
       // If we get here, the tool is not recognized by any feature handler
