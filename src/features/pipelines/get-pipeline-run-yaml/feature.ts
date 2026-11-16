@@ -9,7 +9,9 @@ import { apiVersion, defaultProject } from '../../../utils/environment';
 import { z } from 'zod';
 import { GetPipelineRunYamlSchema } from './schema';
 
-export type GetPipelineRunYamlOptions = z.infer<typeof GetPipelineRunYamlSchema>;
+export type GetPipelineRunYamlOptions = z.infer<
+  typeof GetPipelineRunYamlSchema
+>;
 
 const API_VERSION = apiVersion;
 
@@ -103,7 +105,13 @@ function parseResources(yamlContent: string): Map<string, RepoResource> {
     }
 
     // Exit resources section when we hit a non-indented line that's not a comment
-    if (inResources && line.length > 0 && !line.startsWith(' ') && !line.startsWith('#') && trimmed !== '') {
+    if (
+      inResources &&
+      line.length > 0 &&
+      !line.startsWith(' ') &&
+      !line.startsWith('#') &&
+      trimmed !== ''
+    ) {
       if (currentRepo && currentRepo.alias) {
         resources.set(currentRepo.alias, currentRepo as RepoResource);
       }
@@ -213,7 +221,11 @@ function resolvePath(
 
   // If there's a repo alias and the path doesn't start with ./ or ../,
   // treat it as absolute from the target repo root
-  if (hasRepoAlias && !templatePath.startsWith('./') && !templatePath.startsWith('../')) {
+  if (
+    hasRepoAlias &&
+    !templatePath.startsWith('./') &&
+    !templatePath.startsWith('../')
+  ) {
     return templatePath;
   }
 
@@ -292,10 +304,16 @@ async function getPipelineDefinition(
   const baseUrl = connection.serverUrl.replace(/\/+$/, '');
   const encodedProject = encodeURIComponent(projectId);
 
-  const url = new URL(`${encodedProject}/_apis/pipelines/${pipelineId}`, `${baseUrl}/`);
+  const url = new URL(
+    `${encodedProject}/_apis/pipelines/${pipelineId}`,
+    `${baseUrl}/`,
+  );
   url.searchParams.set('api-version', API_VERSION);
 
-  const requestOptions = pipelinesApi.createRequestOptions('application/json', API_VERSION);
+  const requestOptions = pipelinesApi.createRequestOptions(
+    'application/json',
+    API_VERSION,
+  );
   const response = await pipelinesApi.rest.get<{
     configuration?: {
       path?: string;
@@ -304,7 +322,9 @@ async function getPipelineDefinition(
   } | null>(url.toString(), requestOptions);
 
   if (!response.result?.configuration?.path) {
-    throw new AzureDevOpsResourceNotFoundError(`Pipeline ${pipelineId} has no YAML configuration path`);
+    throw new AzureDevOpsResourceNotFoundError(
+      `Pipeline ${pipelineId} has no YAML configuration path`,
+    );
   }
 
   return {
@@ -321,16 +341,28 @@ async function getBuildDefinition(
   connection: WebApi,
   projectId: string,
   runId: number,
-): Promise<{ pipelineId: number; definitionId: number; repositoryId: string; yamlPath: string; sourceBranch: string }> {
+): Promise<{
+  pipelineId: number;
+  definitionId: number;
+  repositoryId: string;
+  yamlPath: string;
+  sourceBranch: string;
+}> {
   const buildApi = await connection.getBuildApi();
   const baseUrl = connection.serverUrl.replace(/\/+$/, '');
   const encodedProject = encodeURIComponent(projectId);
 
   // Try the Build API first (works on all TFS versions)
-  const url = new URL(`${encodedProject}/_apis/build/builds/${runId}`, `${baseUrl}/`);
+  const url = new URL(
+    `${encodedProject}/_apis/build/builds/${runId}`,
+    `${baseUrl}/`,
+  );
   url.searchParams.set('api-version', API_VERSION);
 
-  const requestOptions = buildApi.createRequestOptions('application/json', API_VERSION);
+  const requestOptions = buildApi.createRequestOptions(
+    'application/json',
+    API_VERSION,
+  );
   const response = await buildApi.rest.get<{
     definition?: { id?: number; name?: string };
     repository?: { id?: string; name?: string; type?: string };
@@ -338,7 +370,9 @@ async function getBuildDefinition(
   } | null>(url.toString(), requestOptions);
 
   if (!response.result?.definition?.id) {
-    throw new AzureDevOpsResourceNotFoundError(`Build ${runId} not found in project ${projectId}`);
+    throw new AzureDevOpsResourceNotFoundError(
+      `Build ${runId} not found in project ${projectId}`,
+    );
   }
 
   const definitionId = response.result.definition.id;
@@ -349,7 +383,11 @@ async function getBuildDefinition(
   let yamlPath = '';
   let pipelineId = definitionId;
   try {
-    const def = await getPipelineDefinition(connection, projectId, definitionId);
+    const def = await getPipelineDefinition(
+      connection,
+      projectId,
+      definitionId,
+    );
     yamlPath = def.path;
     if (def.repositoryId) {
       // Pipeline definition has the authoritative repo ID
@@ -357,7 +395,10 @@ async function getBuildDefinition(
     pipelineId = definitionId;
   } catch {
     // If Pipelines API fails (older TFS), try getting the definition from Build API
-    const defUrl = new URL(`${encodedProject}/_apis/build/definitions/${definitionId}`, `${baseUrl}/`);
+    const defUrl = new URL(
+      `${encodedProject}/_apis/build/definitions/${definitionId}`,
+      `${baseUrl}/`,
+    );
     defUrl.searchParams.set('api-version', API_VERSION);
     const defResponse = await buildApi.rest.get<{
       process?: { yamlFilename?: string; type?: number };
@@ -410,7 +451,11 @@ export async function getPipelineRunYaml(
 
     if (pipelineId) {
       try {
-        const def = await getPipelineDefinition(connection, projectId, pipelineId);
+        const def = await getPipelineDefinition(
+          connection,
+          projectId,
+          pipelineId,
+        );
         yamlPath = def.path;
         mainRepoId = def.repositoryId;
       } catch {
@@ -432,14 +477,17 @@ export async function getPipelineRunYaml(
         runId,
         pipelineId: resolvedPipelineId,
         pipelinePath: '(unknown)',
-        files: [{
-          label: 'pipeline.yaml',
-          repositoryAlias: 'self',
-          repositoryName: mainRepoId,
-          ref: mainRepoRef,
-          path: '(unknown)',
-          content: '# Could not determine the pipeline YAML path for this run.\n# The pipeline may be a classic (designer) pipeline without YAML.',
-        }],
+        files: [
+          {
+            label: 'pipeline.yaml',
+            repositoryAlias: 'self',
+            repositoryName: mainRepoId,
+            ref: mainRepoRef,
+            path: '(unknown)',
+            content:
+              '# Could not determine the pipeline YAML path for this run.\n# The pipeline may be a classic (designer) pipeline without YAML.',
+          },
+        ],
       };
     }
 
@@ -457,14 +505,16 @@ export async function getPipelineRunYaml(
       version,
     );
 
-    const files: PipelineYamlFile[] = [{
-      label: `${yamlPath} (self${mainRepoRef ? '@' + mainRepoRef : ''})`,
-      repositoryAlias: 'self',
-      repositoryName: mainRepoId,
-      ref: mainRepoRef,
-      path: yamlPath,
-      content: mainContent,
-    }];
+    const files: PipelineYamlFile[] = [
+      {
+        label: `${yamlPath} (self${mainRepoRef ? '@' + mainRepoRef : ''})`,
+        repositoryAlias: 'self',
+        repositoryName: mainRepoId,
+        ref: mainRepoRef,
+        path: yamlPath,
+        content: mainContent,
+      },
+    ];
 
     // Step 3: Parse resources from the main YAML
     const resources = parseResources(mainContent);
@@ -524,7 +574,11 @@ export async function getPipelineRunYaml(
         }
 
         // Resolve the template path
-        const resolvedFilePath = resolvePath(basePath, ref.path, !!ref.repoAlias);
+        const resolvedFilePath = resolvePath(
+          basePath,
+          ref.path,
+          !!ref.repoAlias,
+        );
         const visitKey = `${resolvedFilePath}@${targetProjectId}/${targetRepoId}:${targetRef}`;
 
         if (visited.has(visitKey)) {
@@ -578,11 +632,23 @@ export async function getPipelineRunYaml(
 
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
-      if (message.includes('authentication') || message.includes('unauthorized') || message.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        message.includes('authentication') ||
+        message.includes('unauthorized') ||
+        message.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (message.includes('not found') || message.includes('does not exist') || message.includes('404')) {
-        throw new AzureDevOpsResourceNotFoundError(`Pipeline run YAML not found: ${error.message}`);
+      if (
+        message.includes('not found') ||
+        message.includes('does not exist') ||
+        message.includes('404')
+      ) {
+        throw new AzureDevOpsResourceNotFoundError(
+          `Pipeline run YAML not found: ${error.message}`,
+        );
       }
     }
 

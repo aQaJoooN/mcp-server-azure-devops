@@ -6,11 +6,7 @@ export const GetPipelineRunSourcesSchema = z.object({
     .string()
     .optional()
     .describe(`The ID or name of the project (Default: ${defaultProject})`),
-  runId: z
-    .number()
-    .int()
-    .min(1)
-    .describe('The pipeline run ID'),
+  runId: z.number().int().min(1).describe('The pipeline run ID'),
   pipelineId: z
     .number()
     .int()

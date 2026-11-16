@@ -129,14 +129,13 @@ export async function getPipelineRunSources(
           resources.push({
             alias,
             type: 'pipeline',
-            version: (p.run as Record<string, unknown> | undefined)
-              ?.id as string | undefined,
-            definitionId: (
-              p.pipeline as Record<string, unknown> | undefined
-            )?.id as number | undefined,
-            definitionName: (
-              p.pipeline as Record<string, unknown> | undefined
-            )?.name as string | undefined,
+            version: (p.run as Record<string, unknown> | undefined)?.id as
+              | string
+              | undefined,
+            definitionId: (p.pipeline as Record<string, unknown> | undefined)
+              ?.id as number | undefined,
+            definitionName: (p.pipeline as Record<string, unknown> | undefined)
+              ?.name as string | undefined,
           });
         }
       }

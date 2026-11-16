@@ -14,9 +14,5 @@ export const GetPipelineRunYamlSchema = z.object({
     .describe(
       'The pipeline numeric ID. If omitted, the runId is used to look up the build definition.',
     ),
-  runId: z
-    .number()
-    .int()
-    .min(1)
-    .describe('The pipeline run / build ID'),
+  runId: z.number().int().min(1).describe('The pipeline run / build ID'),
 });

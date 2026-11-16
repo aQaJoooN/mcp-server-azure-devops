@@ -35,7 +35,7 @@ export async function listTags(
       undefined, // includeStatuses
       undefined, // includeMyBranches
       undefined, // latestStatusesOnly
-      true,      // peelTags: include the tagged commit objectId
+      true, // peelTags: include the tagged commit objectId
       options.filter, // filterContains: substring match on tag name
     );
 
@@ -61,11 +61,23 @@ export async function listTags(
     }
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
-        throw new AzureDevOpsResourceNotFoundError(`Repository not found: ${error.message}`);
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
+        throw new AzureDevOpsResourceNotFoundError(
+          `Repository not found: ${error.message}`,
+        );
       }
     }
     throw new AzureDevOpsError(

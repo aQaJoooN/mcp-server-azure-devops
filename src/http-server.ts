@@ -112,7 +112,7 @@ async function main() {
       // load balancer; also prevents request-ID collisions between clients).
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined, // stateless
-        enableJsonResponse: true,      // respond with JSON rather than SSE
+        enableJsonResponse: true, // respond with JSON rather than SSE
       });
 
       // Clean up when the client disconnects

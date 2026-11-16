@@ -133,7 +133,10 @@ export async function getPipelineRunStageTasks(
     const stageRecords = records.filter(
       (r) => r.type?.toLowerCase() === 'stage',
     );
-    const jobRecords = records.filter((r) => r.type?.toLowerCase() === 'job' || r.type?.toLowerCase() === 'phase');
+    const jobRecords = records.filter(
+      (r) =>
+        r.type?.toLowerCase() === 'job' || r.type?.toLowerCase() === 'phase',
+    );
     const taskRecords = records.filter((r) => r.type?.toLowerCase() === 'task');
 
     // Filter by stageName/jobName if provided

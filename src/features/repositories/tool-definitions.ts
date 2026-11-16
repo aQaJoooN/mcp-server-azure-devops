@@ -107,14 +107,12 @@ export const repositoriesTools: ToolDefinition[] = [
   },
   {
     name: 'list_branches',
-    description:
-      'List branches in a repository with optional prefix filter',
+    description: 'List branches in a repository with optional prefix filter',
     inputSchema: toJsonSchema(ListBranchesSchema),
   },
   {
     name: 'list_tags',
-    description:
-      'List tags in a repository with optional prefix filter',
+    description: 'List tags in a repository with optional prefix filter',
     inputSchema: toJsonSchema(ListTagsSchema),
   },
 ];
