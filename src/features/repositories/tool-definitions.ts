@@ -11,6 +11,8 @@ import {
   CreateCommitSchema,
   ListCommitsSchema,
 } from './schemas';
+import { ListBranchesSchema } from './list-branches/schema';
+import { ListTagsSchema } from './list-tags/schema';
 
 /**
  * List of repositories tools
@@ -102,5 +104,17 @@ export const repositoriesTools: ToolDefinition[] = [
     description:
       'List recent commits on a branch including file-level diff content for each commit',
     inputSchema: toJsonSchema(ListCommitsSchema),
+  },
+  {
+    name: 'list_branches',
+    description:
+      'List branches in a repository with optional prefix filter',
+    inputSchema: toJsonSchema(ListBranchesSchema),
+  },
+  {
+    name: 'list_tags',
+    description:
+      'List tags in a repository with optional prefix filter',
+    inputSchema: toJsonSchema(ListTagsSchema),
   },
 ];

@@ -12,6 +12,8 @@ export * from './get-repository-tree';
 export * from './create-branch';
 export * from './create-commit';
 export * from './list-commits';
+export * from './list-branches';
+export * from './list-tags';
 
 // Export tool definitions
 export * from './tool-definitions';
@@ -46,6 +48,10 @@ import {
   listCommits,
   formatRepositoryTree,
 } from './';
+import { ListBranchesSchema } from './list-branches/schema';
+import { listBranches } from './list-branches/feature';
+import { ListTagsSchema } from './list-tags/schema';
+import { listTags } from './list-tags/feature';
 
 /**
  * Checks if the request is for the repositories feature
@@ -64,6 +70,8 @@ export const isRepositoriesRequest: RequestIdentifier = (
     'create_branch',
     'create_commit',
     'list_commits',
+    'list_branches',
+    'list_tags',
   ].includes(toolName);
 };
 
@@ -200,6 +208,26 @@ export const handleRepositoriesRequest: RequestHandler = async (
     case 'list_commits': {
       const args = ListCommitsSchema.parse(request.params.arguments);
       const result = await listCommits(connection, {
+        ...args,
+        projectId: args.projectId ?? defaultProject,
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'list_branches': {
+      const args = ListBranchesSchema.parse(request.params.arguments);
+      const result = await listBranches(connection, {
+        ...args,
+        projectId: args.projectId ?? defaultProject,
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'list_tags': {
+      const args = ListTagsSchema.parse(request.params.arguments);
+      const result = await listTags(connection, {
         ...args,
         projectId: args.projectId ?? defaultProject,
       });
