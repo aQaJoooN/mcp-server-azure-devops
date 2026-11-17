@@ -77,10 +77,11 @@ function getConfig(): AzureDevOpsConfig {
   const authMethod = normalizeAuthMethod(process.env.AZURE_DEVOPS_AUTH_METHOD);
   const apiVersionEnv = process.env.AZURE_DEVOPS_API_VERSION;
   const patPresent = Boolean(process.env.AZURE_DEVOPS_PAT);
+  const readOnly = process.env.MCP_READ_ONLY?.toLowerCase() === 'true';
 
   // Always-on one-liner (stdio-safe)
   process.stderr.write(
-    `Azure DevOps MCP Server starting (org=${orgDisplay})\n`,
+    `Azure DevOps MCP Server starting (org=${orgDisplay}${readOnly ? ', read-only' : ''})\n`,
   );
 
   // Verbose dump only when debug logging is enabled
@@ -90,6 +91,7 @@ function getConfig(): AzureDevOpsConfig {
   authMethod: ${authMethod}
   patPresent: ${patPresent}
   apiVersion: ${apiVersionEnv ? `set (${apiVersionEnv})` : 'default'}
+  readOnly: ${readOnly}
 \n`);
   }
 
@@ -98,6 +100,7 @@ function getConfig(): AzureDevOpsConfig {
     authMethod,
     personalAccessToken: process.env.AZURE_DEVOPS_PAT,
     apiVersion: process.env.AZURE_DEVOPS_API_VERSION,
+    readOnly,
   };
 }
 

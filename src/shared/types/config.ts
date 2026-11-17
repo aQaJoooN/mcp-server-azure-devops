@@ -24,4 +24,11 @@ export interface AzureDevOpsConfig {
    * Optional API version to use (defaults to latest)
    */
   apiVersion?: string;
+
+  /**
+   * When true, only read-only tools are exposed and all write operations are
+   * blocked. Set via MCP_READ_ONLY=true.
+   * @default false
+   */
+  readOnly?: boolean;
 }

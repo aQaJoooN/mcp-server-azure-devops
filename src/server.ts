@@ -85,6 +85,34 @@ function safeLog(message: string) {
 }
 
 /**
+ * Tools that mutate state in Azure DevOps.
+ * When readOnly mode is enabled these are removed from the tool list and
+ * blocked at call time.
+ */
+const WRITE_TOOLS = new Set<string>([
+  // repositories
+  'create_branch',
+  'create_commit',
+  // pull-requests
+  'create_pull_request',
+  'add_pull_request_comment',
+  'update_pull_request',
+  'update_pull_request_thread_status',
+  // wikis
+  'create_wiki',
+  'create_wiki_page',
+  'update_wiki_page',
+  // work-items
+  'create_work_item',
+  'update_work_item',
+  'manage_work_item_link',
+  'create_work_item_attachment',
+  'delete_work_item_attachment',
+  // pipelines
+  'trigger_pipeline',
+]);
+
+/**
  * Type definition for the Azure DevOps MCP Server
  */
 export type AzureDevOpsServer = Server;
@@ -116,7 +144,7 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
   // Register the ListTools request handler
   server.setRequestHandler(ListToolsRequestSchema, () => {
     // Combine tools from all features
-    const tools = [
+    let tools = [
       ...projectsTools,
       ...repositoriesTools,
       ...workItemsTools,
@@ -128,6 +156,10 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
       ...librariesTools,
       ...serviceConnectionsTools,
     ];
+
+    if (config.readOnly) {
+      tools = tools.filter((t) => !WRITE_TOOLS.has(t.name));
+    }
 
     return { tools };
   });
@@ -294,6 +326,13 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
       // Note: We don't need to validate the presence of arguments here because:
       // 1. The schema validations (via zod.parse) will check for required parameters
       // 2. Arguments can be omitted entirely for tools with no required parameters
+
+      // Enforce read-only mode: block any write tool even if called directly
+      if (config.readOnly && WRITE_TOOLS.has(request.params.name)) {
+        throw new AzureDevOpsValidationError(
+          `Tool '${request.params.name}' is not available: the server is running in read-only mode.`,
+        );
+      }
 
       // Get a connection to Azure DevOps
       const connection = await getConnection(config);

@@ -13,7 +13,13 @@
  * Environment variables:
  *   PORT                        HTTP port (default: 3000)
  *   MCP_PATH                    URL path for the MCP endpoint (default: /mcp)
- *   AZURE_DEVOPS_ORG_URL        (required) e.g. https://dev.azure.com/my-org
+ *   MCP_AUTH_TOKEN              Optional bearer token clients must supply.
+ *                               When set, every POST to MCP_PATH must include
+ *                               "Authorization: Bearer <token>"; requests
+ *                               without it receive HTTP 401.
+ *   MCP_READ_ONLY               Set to "true" to expose only read tools and
+ *                               block all write operations.
+ *   AZURE_DEVOPS_ORG_URL        (required) e.g. https://host/tfs/Collection
  *   AZURE_DEVOPS_AUTH_METHOD    pat | azure-identity | azure-cli  (default: pat)
  *   AZURE_DEVOPS_PAT            Personal access token (required when auth=pat)
  *   AZURE_DEVOPS_API_VERSION
@@ -52,6 +58,7 @@ function getConfig(): AzureDevOpsConfig {
     authMethod: normalizeAuthMethod(process.env.AZURE_DEVOPS_AUTH_METHOD),
     personalAccessToken: process.env.AZURE_DEVOPS_PAT,
     apiVersion: process.env.AZURE_DEVOPS_API_VERSION,
+    readOnly: process.env.MCP_READ_ONLY?.toLowerCase() === 'true',
   };
 }
 
@@ -70,12 +77,29 @@ function readBody(req: http.IncomingMessage): Promise<string> {
 async function main() {
   const port = parseInt(process.env.PORT ?? '3000', 10);
   const mcpPath = process.env.MCP_PATH ?? '/mcp';
+  const config = getConfig();
 
-  const mcpServer = createAzureDevOpsServer(getConfig());
+  // Optional bearer token that every MCP request must supply.
+  // When MCP_AUTH_TOKEN is not set the endpoint is open (existing behaviour).
+  const mcpAuthToken = process.env.MCP_AUTH_TOKEN?.trim() || null;
+
+  if (mcpAuthToken) {
+    process.stderr.write(
+      'MCP auth token is set – requests must supply "Authorization: Bearer <token>"\n',
+    );
+  }
+
+  if (config.readOnly) {
+    process.stderr.write('MCP server running in read-only mode\n');
+  }
+
+  const mcpServer = createAzureDevOpsServer(config);
 
   const httpServer = http.createServer(async (req, res) => {
     try {
       // ── health check ──────────────────────────────────────────────────────
+      // Health check is intentionally unauthenticated so load balancers and
+      // container orchestrators can probe it without credentials.
       if (req.method === 'GET' && req.url === '/healthz') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok' }));
@@ -95,7 +119,23 @@ async function main() {
         return;
       }
 
-      // Parse body
+      // ── bearer token auth ─────────────────────────────────────────────────
+      if (mcpAuthToken) {
+        const authHeader = req.headers['authorization'] ?? '';
+        const supplied = authHeader.startsWith('Bearer ')
+          ? authHeader.slice(7).trim()
+          : '';
+        if (supplied !== mcpAuthToken) {
+          res.writeHead(401, {
+            'Content-Type': 'application/json',
+            'WWW-Authenticate': 'Bearer realm="mcp"',
+          });
+          res.end(JSON.stringify({ error: 'Unauthorized' }));
+          return;
+        }
+      }
+
+      // ── parse body ────────────────────────────────────────────────────────
       const rawBody = await readBody(req);
       let body: unknown;
       try {
