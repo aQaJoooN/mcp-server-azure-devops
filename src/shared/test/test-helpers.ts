@@ -37,7 +37,6 @@ export function getTestConfig(): AzureDevOpsConfig | null {
       organizationUrl: orgUrl,
       authMethod: AuthenticationMethod.PersonalAccessToken,
       personalAccessToken: pat,
-      defaultProject: process.env.AZURE_DEVOPS_DEFAULT_PROJECT,
     };
   }
 

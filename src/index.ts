@@ -62,19 +62,6 @@ function formatOrgUrlForLog(organizationUrl: string): string {
   }
 }
 
-/**
- * Describe how AZURE_DEVOPS_DEFAULT_PROJECT was provided.
- */
-function describeDefaultProject(envValue: string | undefined): string {
-  if (envValue === undefined) {
-    return 'omitted';
-  }
-  if (envValue === '') {
-    return 'empty string';
-  }
-  return `set (${envValue})`;
-}
-
 function isDebugLoggingEnabled(): boolean {
   const level = (
     process.env.AZURE_DEVOPS_LOG_LEVEL ||
@@ -102,7 +89,6 @@ function getConfig(): AzureDevOpsConfig {
   org: ${orgDisplay}
   authMethod: ${authMethod}
   patPresent: ${patPresent}
-  defaultProject: ${describeDefaultProject(process.env.AZURE_DEVOPS_DEFAULT_PROJECT)}
   apiVersion: ${apiVersionEnv ? `set (${apiVersionEnv})` : 'default'}
 \n`);
   }
@@ -111,7 +97,6 @@ function getConfig(): AzureDevOpsConfig {
     organizationUrl,
     authMethod,
     personalAccessToken: process.env.AZURE_DEVOPS_PAT,
-    defaultProject: process.env.AZURE_DEVOPS_DEFAULT_PROJECT,
     apiVersion: process.env.AZURE_DEVOPS_API_VERSION,
   };
 }

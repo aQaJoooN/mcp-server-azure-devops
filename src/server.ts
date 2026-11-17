@@ -38,22 +38,10 @@ import {
 } from './features/repositories';
 
 import {
-  organizationsTools,
-  isOrganizationsRequest,
-  handleOrganizationsRequest,
-} from './features/organizations';
-
-import {
   searchTools,
   isSearchRequest,
   handleSearchRequest,
 } from './features/search';
-
-import {
-  usersTools,
-  isUsersRequest,
-  handleUsersRequest,
-} from './features/users';
 
 import {
   pullRequestsTools,
@@ -129,8 +117,6 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
   server.setRequestHandler(ListToolsRequestSchema, () => {
     // Combine tools from all features
     const tools = [
-      ...usersTools,
-      ...organizationsTools,
       ...projectsTools,
       ...repositoriesTools,
       ...workItemsTools,
@@ -307,8 +293,7 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
     try {
       // Note: We don't need to validate the presence of arguments here because:
       // 1. The schema validations (via zod.parse) will check for required parameters
-      // 2. Default values from environment.ts are applied for optional parameters (projectId, organizationId)
-      // 3. Arguments can be omitted entirely for tools with no required parameters
+      // 2. Arguments can be omitted entirely for tools with no required parameters
 
       // Get a connection to Azure DevOps
       const connection = await getConnection(config);
@@ -326,17 +311,8 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
         return await handleRepositoriesRequest(connection, request);
       }
 
-      if (isOrganizationsRequest(request)) {
-        // Organizations feature doesn't need the config object anymore
-        return await handleOrganizationsRequest(connection, request);
-      }
-
       if (isSearchRequest(request)) {
         return await handleSearchRequest(connection, request);
-      }
-
-      if (isUsersRequest(request)) {
-        return await handleUsersRequest(connection, request);
       }
 
       if (isPullRequestsRequest(request)) {
@@ -457,7 +433,6 @@ function validateConfig(config: AzureDevOpsConfig): void {
         {
           organizationUrl: config.organizationUrl,
           authMethod: config.authMethod,
-          defaultProject: config.defaultProject,
           // Hide PAT for security
           personalAccessToken: config.personalAccessToken
             ? 'REDACTED'

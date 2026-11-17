@@ -16,7 +16,6 @@
  *   AZURE_DEVOPS_ORG_URL        (required) e.g. https://dev.azure.com/my-org
  *   AZURE_DEVOPS_AUTH_METHOD    pat | azure-identity | azure-cli  (default: pat)
  *   AZURE_DEVOPS_PAT            Personal access token (required when auth=pat)
- *   AZURE_DEVOPS_DEFAULT_PROJECT
  *   AZURE_DEVOPS_API_VERSION
  */
 
@@ -52,7 +51,6 @@ function getConfig(): AzureDevOpsConfig {
     organizationUrl: process.env.AZURE_DEVOPS_ORG_URL ?? '',
     authMethod: normalizeAuthMethod(process.env.AZURE_DEVOPS_AUTH_METHOD),
     personalAccessToken: process.env.AZURE_DEVOPS_PAT,
-    defaultProject: process.env.AZURE_DEVOPS_DEFAULT_PROJECT,
     apiVersion: process.env.AZURE_DEVOPS_API_VERSION,
   };
 }

@@ -42,12 +42,6 @@ export function getOrgNameFromUrl(url?: string): string {
 }
 
 /**
- * Default project name from environment variables
- */
-export const defaultProject =
-  process.env.AZURE_DEVOPS_DEFAULT_PROJECT || 'no default project';
-
-/**
  * Default organization name derived from the organization URL
  */
 export const defaultOrg = getOrgNameFromUrl(process.env.AZURE_DEVOPS_ORG_URL);
