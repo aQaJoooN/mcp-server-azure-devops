@@ -85,21 +85,24 @@ npm run dev            # runs src/index.ts via tsx watch
 # Build the image
 docker build -t mcp-server-azure-devops:local .
 
-# Run — PAT auth, on-prem example
+# Run — PAT auth, on-prem, with read-only mode and auth token
 docker run -p 8888:3000 \
   -e AZURE_DEVOPS_ORG_URL="https://your-server/tfs/YourCollection" \
   -e AZURE_DEVOPS_AUTH_METHOD=pat \
   -e AZURE_DEVOPS_PAT="<token>" \
   -e AZURE_DEVOPS_API_VERSION="6.0" \
+  -e MCP_AUTH_TOKEN="your-secret-token" \
+  -e MCP_READ_ONLY="true" \
   mcp-server-azure-devops:local
 
-# Health check
+# Health check (always open, no token required)
 curl http://localhost:8888/healthz
 
-# JSON-RPC test call
+# JSON-RPC test call (token required when MCP_AUTH_TOKEN is set)
 curl -s -X POST http://localhost:8888/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
+  -H "Authorization: Bearer your-secret-token" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
@@ -195,6 +198,8 @@ Key environment variables include:
 | `AZURE_DEVOPS_ORG_URL`         | Collection URL e.g. `https://host/tfs/Collection` — do **not** include the project | Yes                          | —                |
 | `AZURE_DEVOPS_PAT`             | Personal Access Token (required when auth=pat)                                     | Only with PAT auth           | —                |
 | `AZURE_DEVOPS_API_VERSION`     | REST api-version override (e.g. `6.0` for ADO Server 2019/2020, `7.0` for 2022)   | No                           | `7.1`            |
+| `MCP_AUTH_TOKEN`               | Bearer token clients must supply in `Authorization: Bearer <token>`. When set, unauthenticated requests to the MCP endpoint receive HTTP 401. `/healthz` is always open. | No | — |
+| `MCP_READ_ONLY`                | Set to `true` to expose only read tools and block all write operations.            | No                           | `false`          |
 | `AZURE_TENANT_ID`              | Azure AD tenant ID (service principal auth)                                        | Only with service principals | —                |
 | `AZURE_CLIENT_ID`              | Azure AD application ID (service principal auth)                                   | Only with service principals | —                |
 | `AZURE_CLIENT_SECRET`          | Azure AD client secret (service principal auth)                                    | Only with service principals | —                |
@@ -293,6 +298,46 @@ For full documentation see [docs/tools/README.md](./docs/tools/README.md).
 - `search_code` — full-text code search across repositories
 - `search_wiki` — search wiki pages
 - `search_work_items` — search work items
+
+## MCP Server Security
+
+### Access token (`MCP_AUTH_TOKEN`) — HTTP transport only
+
+When running the HTTP transport (`npm run start:http` / Docker), you can require every client to present a bearer token:
+
+```bash
+MCP_AUTH_TOKEN=your-secret-token npm run start:http
+```
+
+Clients must include the header on every request:
+
+```
+Authorization: Bearer your-secret-token
+```
+
+Requests without a valid token receive `HTTP 401 Unauthorized`. The `/healthz` endpoint is intentionally exempt so load-balancer probes keep working without credentials.
+
+The stdio transport (local AI-assistant use) is not affected — it is already protected by OS process isolation.
+
+### Read-only mode (`MCP_READ_ONLY`)
+
+Set `MCP_READ_ONLY=true` to expose only tools that read data from Azure DevOps. All 15 write tools are removed from the tool list and blocked at call time:
+
+| Category | Blocked tools |
+|---|---|
+| Repositories | `create_branch`, `create_commit` |
+| Pull Requests | `create_pull_request`, `add_pull_request_comment`, `update_pull_request`, `update_pull_request_thread_status` |
+| Wikis | `create_wiki`, `create_wiki_page`, `update_wiki_page` |
+| Work Items | `create_work_item`, `update_work_item`, `manage_work_item_link`, `create_work_item_attachment`, `delete_work_item_attachment` |
+| Pipelines | `trigger_pipeline` |
+
+Any attempt to call a blocked tool returns a clear error: `Tool '<name>' is not available: the server is running in read-only mode.`
+
+Both options can be combined:
+
+```bash
+MCP_AUTH_TOKEN=my-token MCP_READ_ONLY=true npm run start:http
+```
 
 ## Contributing
 

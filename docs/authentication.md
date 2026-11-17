@@ -142,6 +142,8 @@ Azure CLI authentication uses the `AzureCliCredential` class from the `@azure/id
 | `AZURE_DEVOPS_ORG_URL`         | Collection URL e.g. `https://host/tfs/Collection` — do **not** include the project | Yes                          | —                |
 | `AZURE_DEVOPS_PAT`             | Personal Access Token (required when auth=pat)                                     | Only with PAT auth           | —                |
 | `AZURE_DEVOPS_API_VERSION`     | REST api-version override (see [REST API version](#rest-api-version))              | No                           | `7.1`            |
+| `MCP_AUTH_TOKEN`               | Bearer token clients must supply in `Authorization: Bearer <token>`. Requests without it receive HTTP 401. `/healthz` is always open. HTTP transport only. | No | — |
+| `MCP_READ_ONLY`                | Set to `true` to expose only read tools and block all write operations.            | No                           | `false`          |
 | `AZURE_TENANT_ID`              | Azure AD tenant ID (service principals)                                            | Only with service principals | —                |
 | `AZURE_CLIENT_ID`              | Azure AD application ID (service principals)                                       | Only with service principals | —                |
 | `AZURE_CLIENT_SECRET`          | Azure AD client secret (service principals)                                        | Only with service principals | —                |
@@ -281,4 +283,75 @@ AZURE_CLIENT_SECRET=your-client-secret
 ```bash
 AZURE_DEVOPS_AUTH_METHOD=azure-cli
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/mycompany
+```
+
+## MCP Server Security Options
+
+These options control access to the MCP server itself and are independent of how the server authenticates to Azure DevOps.
+
+### MCP Access Token (`MCP_AUTH_TOKEN`) — HTTP transport only
+
+Protects the HTTP MCP endpoint with a bearer token. When set, every `POST` to the MCP endpoint must include:
+
+```
+Authorization: Bearer <your-token>
+```
+
+Requests without a valid token receive `HTTP 401 Unauthorized` and a `WWW-Authenticate: Bearer realm="mcp"` response header.
+
+The `/healthz` endpoint is intentionally exempt so load-balancer and container orchestrator probes keep working without credentials.
+
+The stdio transport is not affected — it is already protected by OS process isolation and is typically used only for local AI-assistant integrations.
+
+```bash
+# stdio (local)
+MCP_AUTH_TOKEN is ignored — not applicable
+
+# HTTP / Docker
+MCP_AUTH_TOKEN=your-secret-token npm run start:http
+
+docker run ... -e MCP_AUTH_TOKEN="your-secret-token" aqajooon/mcp-server-azure-devops:latest
+```
+
+**Choose a strong, random token.** At least 32 characters of random data is recommended:
+
+```bash
+# Generate a suitable token
+openssl rand -hex 32
+```
+
+### Read-Only Mode (`MCP_READ_ONLY`)
+
+When `MCP_READ_ONLY=true`, the server exposes only tools that read data from Azure DevOps. All write tools are removed from the tool list returned by `tools/list` and are blocked at call time, so no mutation can reach Azure DevOps regardless of how a client constructs its request.
+
+Blocked tools:
+
+| Category | Tools |
+|---|---|
+| Repositories | `create_branch`, `create_commit` |
+| Pull Requests | `create_pull_request`, `add_pull_request_comment`, `update_pull_request`, `update_pull_request_thread_status` |
+| Wikis | `create_wiki`, `create_wiki_page`, `update_wiki_page` |
+| Work Items | `create_work_item`, `update_work_item`, `manage_work_item_link`, `create_work_item_attachment`, `delete_work_item_attachment` |
+| Pipelines | `trigger_pipeline` |
+
+Any attempt to call a blocked tool returns:
+
+```
+Tool '<name>' is not available: the server is running in read-only mode.
+```
+
+```bash
+# stdio
+MCP_READ_ONLY=true npm start
+
+# HTTP / Docker
+MCP_READ_ONLY=true npm run start:http
+
+docker run ... -e MCP_READ_ONLY="true" aqajooon/mcp-server-azure-devops:latest
+```
+
+Both options can be combined for maximum safety:
+
+```bash
+MCP_AUTH_TOKEN=my-token MCP_READ_ONLY=true npm run start:http
 ```

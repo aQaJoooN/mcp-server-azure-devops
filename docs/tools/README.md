@@ -14,6 +14,10 @@ This directory documents every tool available in the server. Each page covers pa
 - [Search](./search.md) — `search_code`, `search_wiki`, `search_work_items`
 - [Resource URIs](./resources.md) — accessing repository content via `ado://` URIs
 
+## Read-only mode
+
+When the server is started with `MCP_READ_ONLY=true`, all write tools are removed from this list and blocked at call time. The tools marked **✎ write** below are the ones affected. All others remain available.
+
 ## Tools by Category
 
 ### Project Tools
@@ -28,40 +32,40 @@ This directory documents every tool available in the server. Each page covers pa
 - [`get_file_content`](./repositories.md#get_file_content) — get a file or directory listing
 - [`get_repository_tree`](./repositories.md#get_repository_tree) — get the full directory tree of a repository
 - [`get_all_repositories_tree`](./repositories.md#get_all_repositories_tree) — get tree across all repos in a project
-- [`create_branch`](./repositories.md#create_branch) — create a new branch
-- [`create_commit`](./repositories.md#create_commit) — commit file changes via patch or search/replace
+- [`create_branch`](./repositories.md#create_branch) ✎ write — create a new branch
+- [`create_commit`](./repositories.md#create_commit) ✎ write — commit file changes via patch or search/replace
 - [`list_commits`](./repositories.md#list_commits) — list commits on a branch
 - [`list_branches`](./repositories.md#list_branches) — list branches with optional filter
 - [`list_tags`](./repositories.md#list_tags) — list tags with optional filter
 
 ### Pull Request Tools
-- [`create_pull_request`](./pull-requests.md#create_pull_request) — create a new PR
+- [`create_pull_request`](./pull-requests.md#create_pull_request) ✎ write — create a new PR
 - [`get_pull_request`](./pull-requests.md#get_pull_request) — get a PR by ID
 - [`list_pull_requests`](./pull-requests.md#list_pull_requests) — list PRs with filters
-- [`add_pull_request_comment`](./pull-requests.md#add_pull_request_comment) — add a comment or reply to a thread
+- [`add_pull_request_comment`](./pull-requests.md#add_pull_request_comment) ✎ write — add a comment or reply to a thread
 - [`get_pull_request_comments`](./pull-requests.md#get_pull_request_comments) — get all comment threads
-- [`update_pull_request`](./pull-requests.md#update_pull_request) — update title, description, status, reviewers, work items
-- [`update_pull_request_thread_status`](./pull-requests.md#update_pull_request_thread_status) — set a thread's status
+- [`update_pull_request`](./pull-requests.md#update_pull_request) ✎ write — update title, description, status, reviewers, work items
+- [`update_pull_request_thread_status`](./pull-requests.md#update_pull_request_thread_status) ✎ write — set a thread's status
 - [`get_pull_request_changes`](./pull-requests.md#get_pull_request_changes) — get changed files and diffs
 - [`get_pull_request_checks`](./pull-requests.md#get_pull_request_checks) — get policy evaluations and status checks
 
 ### Work Item Tools
 - [`get_work_item`](./work-items.md#get_work_item) — get a work item by ID
-- [`create_work_item`](./work-items.md#create_work_item) — create a new work item
-- [`update_work_item`](./work-items.md#update_work_item) — update fields on a work item
+- [`create_work_item`](./work-items.md#create_work_item) ✎ write — create a new work item
+- [`update_work_item`](./work-items.md#update_work_item) ✎ write — update fields on a work item
 - [`list_work_items`](./work-items.md#list_work_items) — query work items via WIQL or saved query
 - [`get_work_item_comments`](./work-items.md#get_work_item_comments) — get comments on a work item
-- [`create_work_item_attachment`](./work-items.md#create_work_item_attachment) — upload and attach a file
+- [`create_work_item_attachment`](./work-items.md#create_work_item_attachment) ✎ write — upload and attach a file
 - [`get_work_item_attachment`](./work-items.md#get_work_item_attachment) — download an attachment
-- [`delete_work_item_attachment`](./work-items.md#delete_work_item_attachment) — delete an attachment
-- [`manage_work_item_link`](./work-items.md#manage_work_item_link) — add, update, or remove work item links
+- [`delete_work_item_attachment`](./work-items.md#delete_work_item_attachment) ✎ write — delete an attachment
+- [`manage_work_item_link`](./work-items.md#manage_work_item_link) ✎ write — add, update, or remove work item links
 
 ### Pipeline Tools
 - [`list_pipelines`](./pipelines.md#list_pipelines) — list pipelines in a project
 - [`get_pipeline`](./pipelines.md#get_pipeline) — get pipeline definition details
 - [`list_pipeline_runs`](./pipelines.md#list_pipeline_runs) — list runs with filters (branch, state, result, date)
 - [`get_pipeline_run`](./pipelines.md#get_pipeline_run) — get detailed run info including artifacts
-- [`trigger_pipeline`](./pipelines.md#trigger_pipeline) — trigger a pipeline run
+- [`trigger_pipeline`](./pipelines.md#trigger_pipeline) ✎ write — trigger a pipeline run
 - [`pipeline_timeline`](./pipelines.md#pipeline_timeline) — get stage/job/task timeline for a run
 - [`get_pipeline_log`](./pipelines.md#get_pipeline_log) — get log content for a specific log ID
 - [`download_pipeline_artifact`](./pipelines.md#download_pipeline_artifact) — download a file from pipeline artifacts
@@ -71,10 +75,10 @@ This directory documents every tool available in the server. Each page covers pa
 
 ### Wiki Tools
 - [`get_wikis`](./wiki.md#get_wikis) — list wikis in a project
-- [`create_wiki`](./wiki.md#create_wiki) — create a new wiki
+- [`create_wiki`](./wiki.md#create_wiki) ✎ write — create a new wiki
 - [`get_wiki_page`](./wiki.md#get_wiki_page) — get a wiki page's markdown content
-- [`create_wiki_page`](./wiki.md#create_wiki_page) — create a new wiki page
-- [`update_wiki_page`](./wiki.md#update_wiki_page) — update a wiki page
+- [`create_wiki_page`](./wiki.md#create_wiki_page) ✎ write — create a new wiki page
+- [`update_wiki_page`](./wiki.md#update_wiki_page) ✎ write — update a wiki page
 - [`list_wiki_pages`](./wiki.md#list_wiki_pages) — list all pages in a wiki
 
 ### Search Tools

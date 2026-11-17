@@ -87,6 +87,36 @@ src/features/
 - Only PAT authentication works on-prem (`AZURE_DEVOPS_AUTH_METHOD=pat`)
 - Set `AZURE_DEVOPS_API_VERSION` to match the server version (e.g. `7.0` for ADO Server 2022, `6.0` for 2019/2020)
 
+## MCP server security options
+
+Two env vars control access to the MCP server itself, independent of how the server authenticates to Azure DevOps.
+
+### `MCP_AUTH_TOKEN` — HTTP transport only
+
+When set, every `POST` to the MCP endpoint must include `Authorization: Bearer <value>`. Requests without it receive HTTP 401. The `/healthz` endpoint is always open.
+
+```bash
+MCP_AUTH_TOKEN=your-secret-token npm run start:http
+```
+
+The stdio transport is not affected.
+
+### `MCP_READ_ONLY`
+
+When `MCP_READ_ONLY=true`, write tools are removed from `tools/list` and blocked at call time. The `WRITE_TOOLS` set in `src/server.ts` is the single source of truth.
+
+Write tools (blocked when `MCP_READ_ONLY=true`):
+
+| Feature | Tools |
+|---|---|
+| repositories | `create_branch`, `create_commit` |
+| pull-requests | `create_pull_request`, `add_pull_request_comment`, `update_pull_request`, `update_pull_request_thread_status` |
+| wikis | `create_wiki`, `create_wiki_page`, `update_wiki_page` |
+| work-items | `create_work_item`, `update_work_item`, `manage_work_item_link`, `create_work_item_attachment`, `delete_work_item_attachment` |
+| pipelines | `trigger_pipeline` |
+
+When adding a new write tool, add its name to `WRITE_TOOLS` in `src/server.ts` and add a test in `src/server.spec.unit.ts`.
+
 ## Docker usage
 
 ```bash
@@ -101,12 +131,23 @@ docker run -p 8888:3000 \
   -e AZURE_DEVOPS_API_VERSION="6.0" \
   mcp-server-azure-devops:local
 
-# Health check
+# Run with auth token and read-only mode
+docker run -p 8888:3000 \
+  -e AZURE_DEVOPS_ORG_URL="https://host/tfs/Collection" \
+  -e AZURE_DEVOPS_AUTH_METHOD=pat \
+  -e AZURE_DEVOPS_PAT="<token>" \
+  -e AZURE_DEVOPS_API_VERSION="6.0" \
+  -e MCP_AUTH_TOKEN="your-secret-token" \
+  -e MCP_READ_ONLY="true" \
+  mcp-server-azure-devops:local
+
+# Health check (always open)
 curl http://localhost:8888/healthz
 
-# JSON-RPC call example
+# JSON-RPC call example (include Authorization header when MCP_AUTH_TOKEN is set)
 curl -s -X POST http://localhost:8888/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
+  -H "Authorization: Bearer your-secret-token" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_projects","arguments":{}}}'
 ```
