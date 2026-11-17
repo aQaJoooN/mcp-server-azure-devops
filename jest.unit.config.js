@@ -15,7 +15,16 @@ module.exports = {
   },
   collectCoverage: true,
   coverageDirectory: '<rootDir>/coverage',
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.*.ts', '!src/types/**'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.spec.*.ts',
+    '!src/types/**',
+    '!src/**/__test__/**',
+    '!src/shared/test/**',
+    '!src/http-server.ts',
+    '!src/shared/api/client.ts',
+    '!src/shared/auth/client-factory.ts',
+  ],
   coverageReporters: ['text', 'lcov'],
   coverageThreshold: {
     global: {

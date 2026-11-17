@@ -9,7 +9,23 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { spawnSync } from 'child_process';
 
-describe('setup_env.sh', () => {
+// These tests invoke setup_env.sh via bash. Skip the whole suite when bash is
+// not available or not functional (e.g. on Windows without WSL configured).
+function isBashAvailable(): boolean {
+  try {
+    const result = spawnSync('bash', ['--version'], {
+      encoding: 'utf8',
+      timeout: 3000,
+    });
+    return result.status === 0;
+  } catch {
+    return false;
+  }
+}
+
+const describeIfBash = isBashAvailable() ? describe : describe.skip;
+
+describeIfBash('setup_env.sh', () => {
   it('writes PAT and auth method in non-interactive mode', () => {
     const tempDir = mkdtempSync(join(tmpdir(), 'setup-env-'));
     const scriptPath = join(process.cwd(), 'setup_env.sh');
