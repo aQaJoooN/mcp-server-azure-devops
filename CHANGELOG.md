@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/aQaJoooN/mcp-server-azure-devops/compare/mcp-server-azure-devops-v0.1.55...mcp-server-azure-devops-v0.2.0) (2026-11-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* All tools that previously accepted an optional projectId with a server-side default now require it explicitly.
+* Pass projectId explicitly in every tool call that targets a project.
+
+### Features
+
+* remove cloud-only tools and AZURE_DEVOPS_DEFAULT_PROJECT ([f5a87f0](https://github.com/aQaJoooN/mcp-server-azure-devops/commit/f5a87f08caa4546a5751073a87e8f99d7c681dd6))
+
+
+### Code Refactoring
+
+* make projectId required in all tool schemas ([e64148f](https://github.com/aQaJoooN/mcp-server-azure-devops/commit/e64148f6398c95aade2c41de9c7d25f027a58b9c))
+
 ## [0.1.55](https://github.com/aQaJoooN/mcp-server-azure-devops/compare/mcp-server-azure-devops-v0.1.54...mcp-server-azure-devops-v0.1.55) (2026-11-16)
 
 
