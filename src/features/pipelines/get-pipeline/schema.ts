@@ -1,15 +1,11 @@
 import { z } from 'zod';
-import { defaultProject } from '../../../utils/environment';
 
 /**
  * Schema for the getPipeline function
  */
 export const GetPipelineSchema = z.object({
   // The project containing the pipeline
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   // The ID of the pipeline to retrieve
   pipelineId: z
     .number()

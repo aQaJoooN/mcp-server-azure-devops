@@ -6,7 +6,7 @@ import {
   AzureDevOpsValidationError,
   AzureDevOpsPermissionError,
 } from '../shared/errors';
-import { apiVersion, defaultOrg, defaultProject } from '../utils/environment';
+import { apiVersion, defaultOrg } from '../utils/environment';
 import { resolveAzureDevOpsBaseUrls } from '../shared/azure-devops-url';
 
 interface AzureDevOpsApiErrorResponse {
@@ -149,8 +149,8 @@ export class WikiClient {
    * @returns The created wiki
    */
   async createWiki(projectId: string, params: WikiCreateParameters) {
-    // Use the default project if not provided
-    const project = projectId || defaultProject;
+    // Use the project as provided
+    const project = projectId;
 
     try {
       // Get the actual project ID (whether the input was a name or ID)
@@ -241,8 +241,7 @@ export class WikiClient {
    * @returns The wiki page content and ETag
    */
   async getPage(projectId: string, wikiId: string, pagePath: string) {
-    // Use the default project if not provided
-    const project = projectId || defaultProject;
+    const project = projectId;
 
     // Ensure pagePath starts with a forward slash
     const normalizedPath = pagePath.startsWith('/') ? pagePath : `/${pagePath}`;
@@ -330,8 +329,7 @@ export class WikiClient {
     pagePath: string,
     options?: { comment?: string },
   ) {
-    // Use the default project if not provided
-    const project = projectId || defaultProject;
+    const project = projectId;
 
     // Encode the page path, handling forward slashes properly
     const encodedPagePath = encodeURIComponent(pagePath).replace(/%2F/g, '/');
@@ -446,8 +444,7 @@ export class WikiClient {
     pagePath: string,
     options?: PageUpdateOptions,
   ) {
-    // Use the default project if not provided
-    const project = projectId || defaultProject;
+    const project = projectId;
 
     // First get the current page version
     let currentETag;
@@ -573,8 +570,7 @@ export class WikiClient {
     projectId: string,
     wikiId: string,
   ): Promise<WikiPageSummary[]> {
-    // Use the default project if not provided
-    const project = projectId || defaultProject;
+    const project = projectId;
 
     // Construct the URL for the Pages Batch API
     const url = `${this.baseUrl}/${project}/_apis/wiki/wikis/${wikiId}/pagesbatch`;

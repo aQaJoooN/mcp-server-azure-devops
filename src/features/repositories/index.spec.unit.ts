@@ -97,6 +97,7 @@ describe('Repositories Request Handlers', () => {
         params: {
           name: 'get_repository',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'repo1',
           },
         },
@@ -129,6 +130,7 @@ describe('Repositories Request Handlers', () => {
         params: {
           name: 'get_repository_details',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'repo1',
             includeStatistics: true,
             includeRefs: true,
@@ -192,6 +194,7 @@ describe('Repositories Request Handlers', () => {
         params: {
           name: 'get_file_content',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'repo1',
             path: '/path/to/file',
             version: 'main',
@@ -270,7 +273,7 @@ describe('Repositories Request Handlers', () => {
       const request = {
         params: {
           name: 'get_repository_tree',
-          arguments: { repositoryId: 'r' },
+          arguments: { projectId: 'test-project', repositoryId: 'r' },
         },
         method: 'tools/call',
       } as CallToolRequest;
@@ -287,6 +290,7 @@ describe('Repositories Request Handlers', () => {
         params: {
           name: 'create_branch',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'r',
             sourceBranch: 'main',
             newBranch: 'feature',
@@ -305,6 +309,7 @@ describe('Repositories Request Handlers', () => {
         params: {
           name: 'create_commit',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'r',
             branchName: 'main',
             commitMessage: 'msg',
@@ -326,6 +331,7 @@ describe('Repositories Request Handlers', () => {
         params: {
           name: 'list_commits',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'r',
             branchName: 'main',
           },

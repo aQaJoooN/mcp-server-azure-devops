@@ -4,7 +4,7 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { apiVersion, defaultProject } from '../../../utils/environment';
+import { apiVersion } from '../../../utils/environment';
 import { z } from 'zod';
 import { GetPipelineRunStageTasksSchema } from './schema';
 
@@ -64,7 +64,7 @@ export async function getPipelineRunStageTasks(
 ): Promise<PipelineRunStageTasks> {
   try {
     const buildApi = await connection.getBuildApi();
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const { runId } = options;
 
     const route = `${encodeURIComponent(projectId)}/_apis/build/builds/${runId}/timeline`;

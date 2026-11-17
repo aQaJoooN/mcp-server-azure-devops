@@ -157,7 +157,7 @@ describe('listWikiPages unit', () => {
       expect(Array.isArray(result)).toBe(true);
     });
 
-    test('should use default organization and project when not provided', async () => {
+    test('should use default organization when not provided', async () => {
       const mockPages: WikiPageSummary[] = [
         {
           id: 5,
@@ -170,11 +170,12 @@ describe('listWikiPages unit', () => {
       mockWikiClient.listWikiPages.mockResolvedValue(mockPages);
 
       const result = await listWikiPages({
+        projectId: 'eShopOnWeb',
         wikiId: 'test-wiki',
       });
 
       expect(mockGetWikiClient).toHaveBeenCalledWith({
-        organizationId: 'azure-devops-mcp-testing', // Uses default from environment
+        organizationId: 'azure-devops-mcp-testing',
         projectId: 'eShopOnWeb',
       });
       expect(result).toEqual(mockPages);
@@ -436,16 +437,16 @@ describe('listWikiPages unit', () => {
 
       await listWikiPages({
         organizationId: '',
-        projectId: '',
+        projectId: 'test-project',
         wikiId: 'test-wiki',
       });
 
       expect(mockGetWikiClient).toHaveBeenCalledWith({
-        organizationId: 'azure-devops-mcp-testing', // Empty string gets overridden by default
-        projectId: 'eShopOnWeb',
+        organizationId: 'azure-devops-mcp-testing',
+        projectId: 'test-project',
       });
       expect(mockWikiClient.listWikiPages).toHaveBeenCalledWith(
-        'eShopOnWeb', // Empty string gets overridden by default project
+        'test-project',
         'test-wiki',
       );
     });

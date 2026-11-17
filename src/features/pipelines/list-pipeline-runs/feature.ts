@@ -5,7 +5,7 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { apiVersion, defaultProject } from '../../../utils/environment';
+import { apiVersion } from '../../../utils/environment';
 import { ListPipelineRunsOptions, ListPipelineRunsResult, Run } from '../types';
 
 const API_VERSION = apiVersion;
@@ -55,7 +55,7 @@ export async function listPipelineRuns(
 ): Promise<ListPipelineRunsResult> {
   try {
     const pipelinesApi = await connection.getPipelinesApi();
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const pipelineId = options.pipelineId;
 
     const baseUrl = connection.serverUrl.replace(/\/+$/, '');

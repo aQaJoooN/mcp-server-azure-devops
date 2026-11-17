@@ -4,7 +4,7 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../shared/errors';
-import { apiVersion, defaultProject } from '../../utils/environment';
+import { apiVersion } from '../../utils/environment';
 import { z } from 'zod';
 import { ListEnvironmentsSchema } from './schema';
 
@@ -26,7 +26,7 @@ export async function listEnvironments(
   options: ListEnvironmentsOptions,
 ): Promise<EnvironmentInfo[]> {
   try {
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const baseUrl = connection.serverUrl.replace(/\/+$/, '');
     const encodedProject = encodeURIComponent(projectId);
 

@@ -17,7 +17,6 @@ import {
   RequestIdentifier,
   RequestHandler,
 } from '../../shared/types/request-handler';
-import { defaultProject } from '../../utils/environment';
 import {
   GetProjectSchema,
   GetProjectDetailsSchema,
@@ -61,10 +60,7 @@ export const handleProjectsRequest: RequestHandler = async (
     }
     case 'get_project': {
       const args = GetProjectSchema.parse(request.params.arguments);
-      const result = await getProject(
-        connection,
-        args.projectId ?? defaultProject,
-      );
+      const result = await getProject(connection, args.projectId);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
@@ -72,7 +68,7 @@ export const handleProjectsRequest: RequestHandler = async (
     case 'get_project_details': {
       const args = GetProjectDetailsSchema.parse(request.params.arguments);
       const result = await getProjectDetails(connection, {
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         includeProcess: args.includeProcess,
         includeWorkItemTypes: args.includeWorkItemTypes,
         includeFields: args.includeFields,

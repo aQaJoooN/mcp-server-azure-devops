@@ -8,7 +8,6 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { defaultProject } from '../../../utils/environment';
 import { parseArtifactContainer } from '../artifacts';
 import { resolvePipelineId } from '../helpers';
 import {
@@ -306,7 +305,7 @@ export async function downloadPipelineArtifact(
   options: DownloadPipelineArtifactOptions,
 ): Promise<PipelineArtifactContent> {
   try {
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const runId = options.runId;
     const { artifactName, relativePath } = normalizeArtifactPath(
       options.artifactPath,

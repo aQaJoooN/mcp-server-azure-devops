@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defaultProject, defaultOrg } from '../../../utils/environment';
+import { defaultOrg } from '../../../utils/environment';
 
 /**
  * Schema for creating a new wiki page in Azure DevOps
@@ -10,11 +10,7 @@ export const CreateWikiPageSchema = z.object({
     .optional()
     .nullable()
     .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
-  projectId: z
-    .string()
-    .optional()
-    .nullable()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   wikiId: z.string().min(1).describe('The ID or name of the wiki'),
   pagePath: z
     .string()

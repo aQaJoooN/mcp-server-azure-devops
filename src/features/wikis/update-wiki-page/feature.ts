@@ -1,7 +1,7 @@
 import * as azureDevOpsClient from '../../../clients/azure-devops';
 import { UpdateWikiPageSchema } from './schema';
 import { z } from 'zod';
-import { defaultOrg, defaultProject } from '../../../utils/environment';
+import { defaultOrg } from '../../../utils/environment';
 
 /**
  * Options for updating a wiki page
@@ -22,7 +22,7 @@ export async function updateWikiPage(options: UpdateWikiPageOptions) {
   // Create the client
   const client = await azureDevOpsClient.getWikiClient({
     organizationId: organizationId ?? defaultOrg,
-    projectId: projectId ?? defaultProject,
+    projectId: projectId,
   });
 
   // Prepare the wiki page content
@@ -33,7 +33,7 @@ export async function updateWikiPage(options: UpdateWikiPageOptions) {
   // Update the wiki page
   const updatedPage = await client.updatePage(
     wikiPageContent,
-    projectId ?? defaultProject,
+    projectId,
     wikiId,
     pagePath,
     {

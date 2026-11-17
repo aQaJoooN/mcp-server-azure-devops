@@ -4,7 +4,6 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { defaultProject } from '../../../utils/environment';
 import { z } from 'zod';
 import { ListBranchesSchema } from './schema';
 
@@ -26,7 +25,7 @@ export async function listBranches(
 ): Promise<BranchInfo[]> {
   try {
     const gitApi = await connection.getGitApi();
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
 
     // filter must be the ref prefix relative to "refs/" — always use "heads/"
     // for branches. An additional text filter is passed via filterContains.

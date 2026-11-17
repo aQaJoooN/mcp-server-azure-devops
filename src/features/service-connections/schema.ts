@@ -1,11 +1,8 @@
 import { z } from 'zod';
-import { defaultProject, defaultOrg } from '../../utils/environment';
+import { defaultOrg } from '../../utils/environment';
 
 export const ListServiceConnectionsSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()

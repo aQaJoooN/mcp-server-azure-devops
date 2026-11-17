@@ -1,14 +1,11 @@
 import { z } from 'zod';
-import { defaultProject, defaultOrg } from '../../utils/environment';
+import { defaultOrg } from '../../utils/environment';
 
 /**
  * Schema for creating a pull request
  */
 export const CreatePullRequestSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -63,10 +60,7 @@ export const GetPullRequestSchema = z.object({
  * Schema for listing pull requests
  */
 export const ListPullRequestsSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -100,10 +94,7 @@ export const ListPullRequestsSchema = z.object({
  * Schema for getting pull request comments
  */
 export const GetPullRequestCommentsSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -129,10 +120,7 @@ export const GetPullRequestCommentsSchema = z.object({
  */
 export const AddPullRequestCommentSchema = z
   .object({
-    projectId: z
-      .string()
-      .optional()
-      .describe(`The ID or name of the project (Default: ${defaultProject})`),
+    projectId: z.string().describe('The ID or name of the project'),
     organizationId: z
       .string()
       .optional()
@@ -217,10 +205,7 @@ export const AddPullRequestCommentSchema = z
  * Schema for updating a pull request
  */
 export const UpdatePullRequestSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -279,10 +264,7 @@ export const UpdatePullRequestSchema = z.object({
  * Schema for getting pull request changes and policy evaluations
  */
 export const GetPullRequestChangesSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -295,10 +277,7 @@ export const GetPullRequestChangesSchema = z.object({
  * Schema for retrieving pull request status checks and policy evaluations
  */
 export const GetPullRequestChecksSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -324,10 +303,7 @@ export const GetPullRequestChangesResponseSchema = z.object({
  * Schema for updating pull request thread status
  */
 export const UpdatePullRequestThreadStatusSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()

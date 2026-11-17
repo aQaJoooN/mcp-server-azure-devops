@@ -5,7 +5,7 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { apiVersion, defaultProject } from '../../../utils/environment';
+import { apiVersion } from '../../../utils/environment';
 import { z } from 'zod';
 import { GetPipelineRunYamlSchema } from './schema';
 
@@ -440,7 +440,7 @@ export async function getPipelineRunYaml(
   options: GetPipelineRunYamlOptions,
 ): Promise<PipelineRunYamlResult> {
   try {
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const { runId, pipelineId } = options;
 
     // Step 1: Get the pipeline definition to find YAML path + repo

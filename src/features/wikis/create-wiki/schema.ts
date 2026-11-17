@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { defaultProject, defaultOrg } from '../../../utils/environment';
+import { defaultOrg } from '../../../utils/environment';
 
 /**
  * Wiki types for creating wiki
@@ -27,11 +27,7 @@ export const CreateWikiSchema = z
       .optional()
       .nullable()
       .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
-    projectId: z
-      .string()
-      .optional()
-      .nullable()
-      .describe(`The ID or name of the project (Default: ${defaultProject})`),
+    projectId: z.string().describe('The ID or name of the project'),
     name: z.string().describe('The name of the new wiki'),
     type: z
       .nativeEnum(WikiType)

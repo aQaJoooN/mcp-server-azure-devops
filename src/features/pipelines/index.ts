@@ -45,7 +45,6 @@ import { GetPipelineRunSourcesSchema } from './get-pipeline-run-sources/schema';
 import { getPipelineRunSources } from './get-pipeline-run-sources/feature';
 import { GetPipelineRunStageTasksSchema } from './get-pipeline-run-stage-tasks/schema';
 import { getPipelineRunStageTasks } from './get-pipeline-run-stage-tasks/feature';
-import { defaultProject } from '../../utils/environment';
 
 /**
  * Checks if the request is for the pipelines feature
@@ -81,7 +80,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = ListPipelinesSchema.parse(request.params.arguments);
       const result = await listPipelines(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -91,7 +90,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = GetPipelineSchema.parse(request.params.arguments);
       const result = await getPipeline(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -101,7 +100,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = ListPipelineRunsSchema.parse(request.params.arguments);
       const result = await listPipelineRuns(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -111,7 +110,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = GetPipelineRunSchema.parse(request.params.arguments);
       const result = await getPipelineRun(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -123,7 +122,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       );
       const result = await downloadPipelineArtifact(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -133,7 +132,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = GetPipelineTimelineSchema.parse(request.params.arguments);
       const result = await getPipelineTimeline(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -143,7 +142,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = GetPipelineLogSchema.parse(request.params.arguments);
       const result = await getPipelineLog(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       const text =
         typeof result === 'string' ? result : JSON.stringify(result, null, 2);
@@ -155,7 +154,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = TriggerPipelineSchema.parse(request.params.arguments);
       const result = await triggerPipeline(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -165,7 +164,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = GetPipelineRunYamlSchema.parse(request.params.arguments);
       const result = await getPipelineRunYaml(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       // Format as readable text with all resolved files
       let output = `# Pipeline YAML Resolution\n`;
@@ -191,7 +190,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       const args = GetPipelineRunSourcesSchema.parse(request.params.arguments);
       const result = await getPipelineRunSources(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -203,7 +202,7 @@ export const handlePipelinesRequest: RequestHandler = async (
       );
       const result = await getPipelineRunStageTasks(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],

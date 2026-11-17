@@ -20,7 +20,6 @@ import {
   RequestIdentifier,
   RequestHandler,
 } from '../../shared/types/request-handler';
-import { defaultProject } from '../../utils/environment';
 import {
   CreatePullRequestSchema,
   GetPullRequestSchema,
@@ -74,7 +73,7 @@ export const handlePullRequestsRequest: RequestHandler = async (
       const args = CreatePullRequestSchema.parse(request.params.arguments);
       const result = await createPullRequest(
         connection,
-        args.projectId ?? defaultProject,
+        args.projectId,
         args.repositoryId,
         args,
       );
@@ -96,10 +95,10 @@ export const handlePullRequestsRequest: RequestHandler = async (
       const params = ListPullRequestsSchema.parse(request.params.arguments);
       const result = await listPullRequests(
         connection,
-        params.projectId ?? defaultProject,
+        params.projectId,
         params.repositoryId,
         {
-          projectId: params.projectId ?? defaultProject,
+          projectId: params.projectId,
           repositoryId: params.repositoryId,
           status: params.status,
           creatorId: params.creatorId,
@@ -120,11 +119,11 @@ export const handlePullRequestsRequest: RequestHandler = async (
       );
       const result = await getPullRequestComments(
         connection,
-        params.projectId ?? defaultProject,
+        params.projectId,
         params.repositoryId,
         params.pullRequestId,
         {
-          projectId: params.projectId ?? defaultProject,
+          projectId: params.projectId,
           repositoryId: params.repositoryId,
           pullRequestId: params.pullRequestId,
           threadId: params.threadId,
@@ -142,11 +141,11 @@ export const handlePullRequestsRequest: RequestHandler = async (
       );
       const result = await addPullRequestComment(
         connection,
-        params.projectId ?? defaultProject,
+        params.projectId,
         params.repositoryId,
         params.pullRequestId,
         {
-          projectId: params.projectId ?? defaultProject,
+          projectId: params.projectId,
           repositoryId: params.repositoryId,
           pullRequestId: params.pullRequestId,
           content: params.content,
@@ -166,7 +165,7 @@ export const handlePullRequestsRequest: RequestHandler = async (
       const params = UpdatePullRequestSchema.parse(request.params.arguments);
       const fixedParams = {
         ...params,
-        projectId: params.projectId ?? defaultProject,
+        projectId: params.projectId,
       };
       const result = await updatePullRequest(fixedParams);
       return {
@@ -178,7 +177,7 @@ export const handlePullRequestsRequest: RequestHandler = async (
         request.params.arguments,
       );
       const result = await getPullRequestChanges(connection, {
-        projectId: params.projectId ?? defaultProject,
+        projectId: params.projectId,
         repositoryId: params.repositoryId,
         pullRequestId: params.pullRequestId,
       });
@@ -189,7 +188,7 @@ export const handlePullRequestsRequest: RequestHandler = async (
     case 'get_pull_request_checks': {
       const params = GetPullRequestChecksSchema.parse(request.params.arguments);
       const result = await getPullRequestChecks(connection, {
-        projectId: params.projectId ?? defaultProject,
+        projectId: params.projectId,
         repositoryId: params.repositoryId,
         pullRequestId: params.pullRequestId,
       });
@@ -203,7 +202,7 @@ export const handlePullRequestsRequest: RequestHandler = async (
       );
       const result = await updatePullRequestThreadStatus(
         connection,
-        params.projectId ?? defaultProject,
+        params.projectId,
         params.repositoryId,
         params.pullRequestId,
         params.threadId,

@@ -15,7 +15,7 @@ import {
   RequestIdentifier,
   RequestHandler,
 } from '../../shared/types/request-handler';
-import { defaultProject, defaultOrg } from '../../utils/environment';
+import { defaultOrg } from '../../utils/environment';
 import {
   GetWikisSchema,
   GetWikiPageSchema,
@@ -60,7 +60,7 @@ export const handleWikisRequest: RequestHandler = async (
       const args = GetWikisSchema.parse(request.params.arguments);
       const result = await getWikis(connection, {
         organizationId: args.organizationId ?? defaultOrg,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -70,7 +70,7 @@ export const handleWikisRequest: RequestHandler = async (
       const args = GetWikiPageSchema.parse(request.params.arguments);
       const result = await getWikiPage({
         organizationId: args.organizationId ?? defaultOrg,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         wikiId: args.wikiId,
         pagePath: args.pagePath,
       });
@@ -82,7 +82,7 @@ export const handleWikisRequest: RequestHandler = async (
       const args = CreateWikiSchema.parse(request.params.arguments);
       const result = await createWiki(connection, {
         organizationId: args.organizationId ?? defaultOrg,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         name: args.name,
         type: args.type,
         repositoryId: args.repositoryId ?? undefined,
@@ -96,7 +96,7 @@ export const handleWikisRequest: RequestHandler = async (
       const args = UpdateWikiPageSchema.parse(request.params.arguments);
       const result = await updateWikiPage({
         organizationId: args.organizationId ?? defaultOrg,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         wikiId: args.wikiId,
         pagePath: args.pagePath,
         content: args.content,
@@ -110,7 +110,7 @@ export const handleWikisRequest: RequestHandler = async (
       const args = ListWikiPagesSchema.parse(request.params.arguments);
       const result = await listWikiPages({
         organizationId: args.organizationId ?? defaultOrg,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         wikiId: args.wikiId,
       });
       return {
@@ -121,7 +121,7 @@ export const handleWikisRequest: RequestHandler = async (
       const args = CreateWikiPageSchema.parse(request.params.arguments);
       const result = await createWikiPage({
         organizationId: args.organizationId ?? defaultOrg,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         wikiId: args.wikiId,
         pagePath: args.pagePath,
         content: args.content,

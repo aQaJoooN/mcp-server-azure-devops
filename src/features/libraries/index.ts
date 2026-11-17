@@ -10,7 +10,6 @@ import {
 import { toJsonSchema } from '../../shared/utils/to-json-schema';
 import { ListLibrariesSchema } from './schema';
 import { listLibraries } from './feature';
-import { defaultProject } from '../../utils/environment';
 
 export const librariesTools = [
   {
@@ -32,7 +31,7 @@ export const handleLibrariesRequest: RequestHandler = async (
   const args = ListLibrariesSchema.parse(request.params.arguments);
   const result = await listLibraries(connection, {
     ...args,
-    projectId: args.projectId ?? defaultProject,
+    projectId: args.projectId,
   });
   return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 };

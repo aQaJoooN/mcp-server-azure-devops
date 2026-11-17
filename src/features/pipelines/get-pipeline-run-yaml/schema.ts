@@ -1,11 +1,7 @@
 import { z } from 'zod';
-import { defaultProject } from '../../../utils/environment';
 
 export const GetPipelineRunYamlSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   pipelineId: z
     .number()
     .int()

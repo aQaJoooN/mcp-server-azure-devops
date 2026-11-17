@@ -4,7 +4,7 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../shared/errors';
-import { apiVersion, defaultProject } from '../../utils/environment';
+import { apiVersion } from '../../utils/environment';
 import { z } from 'zod';
 import { ListLibrariesSchema } from './schema';
 
@@ -31,7 +31,7 @@ export async function listLibraries(
   options: ListLibrariesOptions,
 ): Promise<VariableGroupInfo[]> {
   try {
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const baseUrl = connection.serverUrl.replace(/\/+$/, '');
     const encodedProject = encodeURIComponent(projectId);
 

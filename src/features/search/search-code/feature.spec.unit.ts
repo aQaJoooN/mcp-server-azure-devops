@@ -544,133 +544,14 @@ describe('searchCode unit', () => {
     expect(result.results[0].content).toBeUndefined();
   });
 
-  test('should use default project when projectId is not provided', async () => {
-    // Arrange
-    // Set up environment variable for default project
-    const originalEnv = process.env.AZURE_DEVOPS_DEFAULT_PROJECT;
-    process.env.AZURE_DEVOPS_DEFAULT_PROJECT = 'DefaultProject';
-
-    const mockSearchResponse = {
-      data: {
-        count: 2,
-        results: [
-          {
-            fileName: 'example1.ts',
-            path: '/src/example1.ts',
-            matches: {
-              content: [
-                {
-                  charOffset: 17,
-                  length: 7,
-                },
-              ],
-            },
-            collection: {
-              name: 'DefaultCollection',
-            },
-            project: {
-              name: 'DefaultProject',
-              id: 'default-project-id',
-            },
-            repository: {
-              name: 'Repo1',
-              id: 'repo-id-1',
-              type: 'git',
-            },
-            versions: [
-              {
-                branchName: 'main',
-                changeId: 'commit-hash-1',
-              },
-            ],
-            contentId: 'content-hash-1',
-          },
-          {
-            fileName: 'example2.ts',
-            path: '/src/example2.ts',
-            matches: {
-              content: [
-                {
-                  charOffset: 17,
-                  length: 7,
-                },
-              ],
-            },
-            collection: {
-              name: 'DefaultCollection',
-            },
-            project: {
-              name: 'DefaultProject',
-              id: 'default-project-id',
-            },
-            repository: {
-              name: 'Repo2',
-              id: 'repo-id-2',
-              type: 'git',
-            },
-            versions: [
-              {
-                branchName: 'main',
-                changeId: 'commit-hash-2',
-              },
-            ],
-            contentId: 'content-hash-2',
-          },
-        ],
-      },
-    };
-
-    mockedAxios.post.mockResolvedValueOnce(mockSearchResponse);
-
-    try {
-      // Act
-      const result = await searchCode(mockConnection, {
+  test('should require projectId when not provided', async () => {
+    // Act & Assert
+    await expect(
+      searchCode(mockConnection, {
         searchText: 'example',
         includeContent: false,
-      });
-
-      // Assert
-      expect(result).toBeDefined();
-      expect(result.count).toBe(2);
-      expect(result.results).toHaveLength(2);
-      expect(result.results[0].project.name).toBe('DefaultProject');
-      expect(result.results[1].project.name).toBe('DefaultProject');
-      expect(mockedAxios.post).toHaveBeenCalledTimes(1);
-      expect(mockedAxios.post).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'https://almsearch.dev.azure.com/testorg/DefaultProject/_apis/search/codesearchresults',
-        ),
-        expect.objectContaining({
-          filters: expect.objectContaining({
-            Project: ['DefaultProject'],
-          }),
-        }),
-        expect.any(Object),
-      );
-    } finally {
-      // Restore original environment variable
-      process.env.AZURE_DEVOPS_DEFAULT_PROJECT = originalEnv;
-    }
-  });
-
-  test('should throw error when no projectId is provided and no default project is set', async () => {
-    // Arrange
-    // Ensure no default project is set
-    const originalEnv = process.env.AZURE_DEVOPS_DEFAULT_PROJECT;
-    process.env.AZURE_DEVOPS_DEFAULT_PROJECT = '';
-
-    try {
-      // Act & Assert
-      await expect(
-        searchCode(mockConnection, {
-          searchText: 'example',
-          includeContent: false,
-        }),
-      ).rejects.toThrow('Project ID is required');
-    } finally {
-      // Restore original environment variable
-      process.env.AZURE_DEVOPS_DEFAULT_PROJECT = originalEnv;
-    }
+      } as any),
+    ).rejects.toThrow('Project ID is required');
   });
 
   test('should handle includeContent for different content types', async () => {

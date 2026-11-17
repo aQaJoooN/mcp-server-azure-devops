@@ -4,7 +4,7 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { apiVersion, defaultProject } from '../../../utils/environment';
+import { apiVersion } from '../../../utils/environment';
 import { GetPipelineLogOptions, PipelineLogContent } from '../types';
 
 const API_VERSION = apiVersion;
@@ -15,7 +15,7 @@ export async function getPipelineLog(
 ): Promise<PipelineLogContent> {
   try {
     const buildApi = await connection.getBuildApi();
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const { runId, logId, format, startLine, endLine } = options;
 
     if (format === 'json') {

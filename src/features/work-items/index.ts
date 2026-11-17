@@ -23,7 +23,6 @@ import {
   RequestIdentifier,
   RequestHandler,
 } from '../../shared/types/request-handler';
-import { defaultProject } from '../../utils/environment';
 import {
   ListWorkItemsSchema,
   GetWorkItemSchema,
@@ -92,7 +91,7 @@ export const handleWorkItemsRequest: RequestHandler = async (
     case 'list_work_items': {
       const args = ListWorkItemsSchema.parse(request.params.arguments);
       const result = await listWorkItems(connection, {
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         teamId: args.teamId,
         queryId: args.queryId,
         wiql: args.wiql,
@@ -108,7 +107,7 @@ export const handleWorkItemsRequest: RequestHandler = async (
       const args = CreateWorkItemSchema.parse(request.params.arguments);
       const result = await createWorkItem(
         connection,
-        args.projectId ?? defaultProject,
+        args.projectId,
         args.workItemType,
         {
           title: args.title,
@@ -147,18 +146,14 @@ export const handleWorkItemsRequest: RequestHandler = async (
     }
     case 'manage_work_item_link': {
       const args = ManageWorkItemLinkSchema.parse(request.params.arguments);
-      const result = await manageWorkItemLink(
-        connection,
-        args.projectId ?? defaultProject,
-        {
-          sourceWorkItemId: args.sourceWorkItemId,
-          targetWorkItemId: args.targetWorkItemId,
-          operation: args.operation,
-          relationType: args.relationType,
-          newRelationType: args.newRelationType,
-          comment: args.comment,
-        },
-      );
+      const result = await manageWorkItemLink(connection, args.projectId, {
+        sourceWorkItemId: args.sourceWorkItemId,
+        targetWorkItemId: args.targetWorkItemId,
+        operation: args.operation,
+        relationType: args.relationType,
+        newRelationType: args.newRelationType,
+        comment: args.comment,
+      });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

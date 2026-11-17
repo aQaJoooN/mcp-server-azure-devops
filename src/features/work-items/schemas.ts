@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defaultProject, defaultOrg } from '../../utils/environment';
+import { defaultOrg } from '../../utils/environment';
 
 /**
  * Schema for getting a work item
@@ -18,10 +18,7 @@ export const GetWorkItemSchema = z.object({
  * Schema for listing work items
  */
 export const ListWorkItemsSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -46,10 +43,7 @@ export const ListWorkItemsSchema = z.object({
  * Schema for creating a work item
  */
 export const CreateWorkItemSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -144,10 +138,7 @@ export const UpdateWorkItemSchema = z.object({
 export const ManageWorkItemLinkSchema = z.object({
   sourceWorkItemId: z.number().describe('The ID of the source work item'),
   targetWorkItemId: z.number().describe('The ID of the target work item'),
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()

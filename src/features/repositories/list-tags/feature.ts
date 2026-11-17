@@ -4,7 +4,6 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { defaultProject } from '../../../utils/environment';
 import { z } from 'zod';
 import { ListTagsSchema } from './schema';
 
@@ -25,7 +24,7 @@ export async function listTags(
 ): Promise<TagInfo[]> {
   try {
     const gitApi = await connection.getGitApi();
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
 
     const refs = await gitApi.getRefs(
       options.repositoryId,

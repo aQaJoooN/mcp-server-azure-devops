@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defaultOrg, defaultProject } from '../../utils/environment';
+import { defaultOrg } from '../../utils/environment';
 
 /**
  * Schema for searching code in Azure DevOps repositories
@@ -14,7 +14,7 @@ export const SearchCodeSchema = z.object({
     .string()
     .optional()
     .describe(
-      `The ID or name of the project to search in (Default: ${defaultProject}). If not provided, the default project will be used.`,
+      'The ID or name of the project to search in. If omitted, the search runs across the organization when supported.',
     ),
   filters: z
     .object({

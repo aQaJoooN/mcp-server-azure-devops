@@ -3,6 +3,7 @@ import { AddPullRequestCommentSchema } from './schemas';
 describe('pull request schemas', () => {
   describe('AddPullRequestCommentSchema', () => {
     const fileComment = {
+      projectId: 'test-project',
       pullRequestId: 123,
       content: 'c',
       status: 'active',

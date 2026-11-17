@@ -1,6 +1,6 @@
 import * as azureDevOpsClient from '../../../clients/azure-devops';
 import { AzureDevOpsError } from '../../../shared/errors/azure-devops-errors';
-import { defaultOrg, defaultProject } from '../../../utils/environment';
+import { defaultOrg } from '../../../utils/environment';
 import { ListWikiPagesOptions } from './schema';
 
 /**
@@ -29,7 +29,7 @@ export async function listWikiPages(
 
   // Use defaults if not provided
   const orgId = organizationId || defaultOrg;
-  const projId = projectId || defaultProject;
+  const projId = projectId;
 
   try {
     // Create the client

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { defaultProject, defaultOrg } from '../../../utils/environment';
+import { defaultOrg } from '../../../utils/environment';
 
 /**
  * Schema for listing wiki pages from an Azure DevOps wiki
@@ -11,11 +11,7 @@ export const ListWikiPagesSchema = z.object({
     .optional()
     .nullable()
     .describe(`The ID or name of the organization (Default: ${defaultOrg})`),
-  projectId: z
-    .string()
-    .optional()
-    .nullable()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   wikiId: z.string().describe('The ID or name of the wiki'),
 });
 

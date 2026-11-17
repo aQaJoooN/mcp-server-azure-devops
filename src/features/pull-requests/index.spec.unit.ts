@@ -81,6 +81,7 @@ describe('Pull Requests Request Handlers', () => {
         params: {
           name: 'create_pull_request',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'test-repo',
             title: 'Test PR',
             sourceRefName: 'refs/heads/feature',
@@ -124,6 +125,7 @@ describe('Pull Requests Request Handlers', () => {
         params: {
           name: 'list_pull_requests',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'test-repo',
             status: 'active',
           },
@@ -187,6 +189,7 @@ describe('Pull Requests Request Handlers', () => {
         params: {
           name: 'get_pull_request_comments',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'test-repo',
             pullRequestId: 123,
           },
@@ -221,10 +224,11 @@ describe('Pull Requests Request Handlers', () => {
         params: {
           name: 'add_pull_request_comment',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'test-repo',
             pullRequestId: 123,
             content: 'New comment',
-            status: 'active', // Status is required when creating a new thread
+            status: 'active',
           },
         },
         method: 'tools/call',
@@ -232,6 +236,7 @@ describe('Pull Requests Request Handlers', () => {
 
       // Mock the schema parsing
       const mockParsedArgs = {
+        projectId: 'test-project',
         repositoryId: 'test-repo',
         pullRequestId: 123,
         content: 'New comment',
@@ -268,7 +273,11 @@ describe('Pull Requests Request Handlers', () => {
       const request = {
         params: {
           name: 'get_pull_request_changes',
-          arguments: { repositoryId: 'test-repo', pullRequestId: 1 },
+          arguments: {
+            projectId: 'test-project',
+            repositoryId: 'test-repo',
+            pullRequestId: 1,
+          },
         },
         method: 'tools/call',
       } as CallToolRequest;
@@ -285,7 +294,11 @@ describe('Pull Requests Request Handlers', () => {
       const request = {
         params: {
           name: 'get_pull_request_checks',
-          arguments: { repositoryId: 'test-repo', pullRequestId: 7 },
+          arguments: {
+            projectId: 'test-project',
+            repositoryId: 'test-repo',
+            pullRequestId: 7,
+          },
         },
         method: 'tools/call',
       } as CallToolRequest;
@@ -324,6 +337,7 @@ describe('Pull Requests Request Handlers', () => {
         params: {
           name: 'list_pull_requests',
           arguments: {
+            projectId: 'test-project',
             repositoryId: 'test-repo',
           },
         },

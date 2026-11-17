@@ -10,7 +10,6 @@ import {
 import { toJsonSchema } from '../../shared/utils/to-json-schema';
 import { ListEnvironmentsSchema } from './schema';
 import { listEnvironments } from './feature';
-import { defaultProject } from '../../utils/environment';
 
 export const environmentsTools = [
   {
@@ -32,7 +31,7 @@ export const handleEnvironmentsRequest: RequestHandler = async (
   const args = ListEnvironmentsSchema.parse(request.params.arguments);
   const result = await listEnvironments(connection, {
     ...args,
-    projectId: args.projectId ?? defaultProject,
+    projectId: args.projectId,
   });
   return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 };

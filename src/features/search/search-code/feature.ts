@@ -35,13 +35,12 @@ export async function searchCode(
       ? Math.min(options.top || 10, 10)
       : options.top;
 
-    // Get the project ID (either provided or default)
-    const projectId =
-      options.projectId || process.env.AZURE_DEVOPS_DEFAULT_PROJECT;
+    // Get the project ID
+    const projectId = options.projectId;
 
     if (!projectId) {
       throw new AzureDevOpsValidationError(
-        'Project ID is required. Either provide a projectId or set the AZURE_DEVOPS_DEFAULT_PROJECT environment variable.',
+        'Project ID is required. Please provide a projectId parameter.',
       );
     }
 

@@ -26,7 +26,7 @@ import {
   RequestIdentifier,
   RequestHandler,
 } from '../../shared/types/request-handler';
-import { defaultProject, defaultOrg } from '../../utils/environment';
+import { defaultOrg } from '../../utils/environment';
 import {
   GetRepositorySchema,
   GetRepositoryDetailsSchema,
@@ -87,7 +87,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = GetRepositorySchema.parse(request.params.arguments);
       const result = await getRepository(
         connection,
-        args.projectId ?? defaultProject,
+        args.projectId,
         args.repositoryId,
       );
       return {
@@ -97,7 +97,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
     case 'get_repository_details': {
       const args = GetRepositoryDetailsSchema.parse(request.params.arguments);
       const result = await getRepositoryDetails(connection, {
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         repositoryId: args.repositoryId,
         includeStatistics: args.includeStatistics,
         includeRefs: args.includeRefs,
@@ -112,7 +112,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = ListRepositoriesSchema.parse(request.params.arguments);
       const result = await listRepositories(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -135,7 +135,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
 
       const result = await getFileContent(
         connection,
-        args.projectId ?? defaultProject,
+        args.projectId,
         args.repositoryId,
         args.path,
         versionTypeEnum !== undefined && args.version
@@ -150,7 +150,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = GetAllRepositoriesTreeSchema.parse(request.params.arguments);
       const result = await getAllRepositoriesTree(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
         organizationId: args.organizationId ?? defaultOrg,
       });
 
@@ -174,7 +174,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = GetRepositoryTreeSchema.parse(request.params.arguments);
       const result = await getRepositoryTree(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [
@@ -189,7 +189,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = CreateBranchSchema.parse(request.params.arguments);
       await createBranch(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: 'Branch created successfully' }],
@@ -199,7 +199,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = CreateCommitSchema.parse(request.params.arguments);
       await createCommit(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: 'Commit created successfully' }],
@@ -209,7 +209,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = ListCommitsSchema.parse(request.params.arguments);
       const result = await listCommits(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -219,7 +219,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = ListBranchesSchema.parse(request.params.arguments);
       const result = await listBranches(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
@@ -229,7 +229,7 @@ export const handleRepositoriesRequest: RequestHandler = async (
       const args = ListTagsSchema.parse(request.params.arguments);
       const result = await listTags(connection, {
         ...args,
-        projectId: args.projectId ?? defaultProject,
+        projectId: args.projectId,
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],

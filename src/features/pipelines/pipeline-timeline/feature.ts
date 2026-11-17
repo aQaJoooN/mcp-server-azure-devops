@@ -9,7 +9,7 @@ import {
   AzureDevOpsError,
   AzureDevOpsResourceNotFoundError,
 } from '../../../shared/errors';
-import { apiVersion, defaultProject } from '../../../utils/environment';
+import { apiVersion } from '../../../utils/environment';
 import { GetPipelineTimelineOptions, PipelineTimeline } from '../types';
 
 const API_VERSION = apiVersion;
@@ -20,7 +20,7 @@ export async function getPipelineTimeline(
 ): Promise<PipelineTimeline> {
   try {
     const buildApi = await connection.getBuildApi();
-    const projectId = options.projectId ?? defaultProject;
+    const projectId = options.projectId;
     const { runId, timelineId, state, result } = options;
 
     const route = `${encodeURIComponent(projectId)}/_apis/build/builds/${runId}/timeline`;

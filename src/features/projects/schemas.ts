@@ -1,14 +1,11 @@
 import { z } from 'zod';
-import { defaultProject, defaultOrg } from '../../utils/environment';
+import { defaultOrg } from '../../utils/environment';
 
 /**
  * Schema for getting a project
  */
 export const GetProjectSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()
@@ -19,10 +16,7 @@ export const GetProjectSchema = z.object({
  * Schema for getting detailed project information
  */
 export const GetProjectDetailsSchema = z.object({
-  projectId: z
-    .string()
-    .optional()
-    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  projectId: z.string().describe('The ID or name of the project'),
   organizationId: z
     .string()
     .optional()

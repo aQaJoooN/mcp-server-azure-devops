@@ -10,7 +10,6 @@ import {
 import { toJsonSchema } from '../../shared/utils/to-json-schema';
 import { ListServiceConnectionsSchema } from './schema';
 import { listServiceConnections } from './feature';
-import { defaultProject } from '../../utils/environment';
 
 export const serviceConnectionsTools = [
   {
@@ -32,7 +31,7 @@ export const handleServiceConnectionsRequest: RequestHandler = async (
   const args = ListServiceConnectionsSchema.parse(request.params.arguments);
   const result = await listServiceConnections(connection, {
     ...args,
-    projectId: args.projectId ?? defaultProject,
+    projectId: args.projectId,
   });
   return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
 };
