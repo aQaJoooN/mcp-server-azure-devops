@@ -41,9 +41,6 @@ To use Azure Identity authentication, set the following environment variables:
 # Required
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/your-organization
 AZURE_DEVOPS_AUTH_METHOD=azure-identity
-
-# Optional
-AZURE_DEVOPS_DEFAULT_PROJECT=your-project-name
 ```
 
 For service principal authentication, add these environment variables:
@@ -63,11 +60,10 @@ Add the following to your configuration file:
   "mcpServers": {
     "azureDevOps": {
       "command": "npx",
-      "args": ["-y", "@tiberriver256/mcp-server-azure-devops"],
+      "args": ["-y", "@aqajooon/mcp-server-azure-devops"],
       "env": {
         "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/your-organization",
-        "AZURE_DEVOPS_AUTH_METHOD": "azure-identity",
-        "AZURE_DEVOPS_DEFAULT_PROJECT": "your-project-name"
+        "AZURE_DEVOPS_AUTH_METHOD": "azure-identity"
       }
     }
   }
@@ -172,7 +168,6 @@ Error: Failed to authenticate with Azure Identity: ClientAuthError: Interaction 
 ```bash
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/mycompany
 AZURE_DEVOPS_AUTH_METHOD=azure-identity
-AZURE_DEVOPS_DEFAULT_PROJECT=MyProject
 ```
 
 ### Service principal authentication
@@ -180,7 +175,6 @@ AZURE_DEVOPS_DEFAULT_PROJECT=MyProject
 ```bash
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/mycompany
 AZURE_DEVOPS_AUTH_METHOD=azure-identity
-AZURE_DEVOPS_DEFAULT_PROJECT=MyProject
 AZURE_TENANT_ID=00000000-0000-0000-0000-000000000000
 AZURE_CLIENT_ID=11111111-1111-1111-1111-111111111111
 AZURE_CLIENT_SECRET=your-client-secret

@@ -37,9 +37,8 @@ PAT authentication is the simplest method and works well for personal use or tes
 2. **Configure your `.env` file**:
    ```
    AZURE_DEVOPS_AUTH_METHOD=pat
-   AZURE_DEVOPS_ORG_URL=https://dev.azure.com/your-organization
+   AZURE_DEVOPS_ORG_URL=https://your-server/tfs/YourCollection
    AZURE_DEVOPS_PAT=your-personal-access-token
-   AZURE_DEVOPS_DEFAULT_PROJECT=your-default-project
    ```
 
 ### Security Considerations
@@ -78,7 +77,6 @@ This makes it ideal for applications that need to work in different environments
    ```
    AZURE_DEVOPS_AUTH_METHOD=azure-identity
    AZURE_DEVOPS_ORG_URL=https://dev.azure.com/your-organization
-   AZURE_DEVOPS_DEFAULT_PROJECT=your-default-project
    ```
 
 3. **Set up credentials based on your environment**:
@@ -128,7 +126,6 @@ Azure CLI authentication uses the `AzureCliCredential` class from the `@azure/id
    ```
    AZURE_DEVOPS_AUTH_METHOD=azure-cli
    AZURE_DEVOPS_ORG_URL=https://dev.azure.com/your-organization
-   AZURE_DEVOPS_DEFAULT_PROJECT=your-default-project
    ```
 
 ### Security Considerations
@@ -142,14 +139,15 @@ Azure CLI authentication uses the `AzureCliCredential` class from the `@azure/id
 | Variable                       | Description                                                                        | Required                     | Default          |
 | ------------------------------ | ---------------------------------------------------------------------------------- | ---------------------------- | ---------------- |
 | `AZURE_DEVOPS_AUTH_METHOD`     | Authentication method (`pat`, `azure-identity`, or `azure-cli`) - case-insensitive | No                           | `azure-identity` |
-| `AZURE_DEVOPS_ORG_URL`         | Full URL to your Azure DevOps organization                                         | Yes                          | -                |
-| `AZURE_DEVOPS_PAT`             | Personal Access Token (for PAT auth)                                               | Only with PAT auth           | -                |
-| `AZURE_DEVOPS_DEFAULT_PROJECT` | Default project if none specified                                                  | No                           | -                |
-| `AZURE_DEVOPS_API_VERSION`     | REST api-version for the tools that call the REST API directly (see [REST API version](#rest-api-version)) | No                           | `7.1`            |
-| `AZURE_TENANT_ID`              | Azure AD tenant ID (for service principals)                                        | Only with service principals | -                |
-| `AZURE_CLIENT_ID`              | Azure AD application ID (for service principals)                                   | Only with service principals | -                |
-| `AZURE_CLIENT_SECRET`          | Azure AD client secret (for service principals)                                    | Only with service principals | -                |
-| `LOG_LEVEL`                    | Logging level (debug, info, warn, error)                                           | No                           | info             |
+| `AZURE_DEVOPS_ORG_URL`         | Collection URL e.g. `https://host/tfs/Collection` — do **not** include the project | Yes                          | —                |
+| `AZURE_DEVOPS_PAT`             | Personal Access Token (required when auth=pat)                                     | Only with PAT auth           | —                |
+| `AZURE_DEVOPS_API_VERSION`     | REST api-version override (see [REST API version](#rest-api-version))              | No                           | `7.1`            |
+| `AZURE_TENANT_ID`              | Azure AD tenant ID (service principals)                                            | Only with service principals | —                |
+| `AZURE_CLIENT_ID`              | Azure AD application ID (service principals)                                       | Only with service principals | —                |
+| `AZURE_CLIENT_SECRET`          | Azure AD client secret (service principals)                                        | Only with service principals | —                |
+| `LOG_LEVEL`                    | Logging level (`debug`, `info`, `warn`, `error`)                                   | No                           | `info`           |
+
+> **`AZURE_DEVOPS_DEFAULT_PROJECT` has been removed.** Every tool that targets a project requires `projectId` explicitly in the call arguments.
 
 ### REST API version
 
@@ -252,32 +250,27 @@ part of the tools may still be rejected on those releases.
 
 ## Examples
 
-### Example 1: Local Development with PAT
+### Example 1: Local Development with PAT (on-prem)
 
 ```bash
-# .env file
 AZURE_DEVOPS_AUTH_METHOD=pat
-AZURE_DEVOPS_ORG_URL=https://dev.azure.com/mycompany
-AZURE_DEVOPS_PAT=abcdefghijklmnopqrstuvwxyz0123456789
-AZURE_DEVOPS_DEFAULT_PROJECT=MyProject
+AZURE_DEVOPS_ORG_URL=https://your-server/tfs/YourCollection
+AZURE_DEVOPS_PAT=your-personal-access-token
+AZURE_DEVOPS_API_VERSION=6.0
 ```
 
 ### Example 2: Azure-hosted Application with Managed Identity
 
 ```bash
-# .env file
 AZURE_DEVOPS_AUTH_METHOD=azure-identity
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/mycompany
-AZURE_DEVOPS_DEFAULT_PROJECT=MyProject
 ```
 
 ### Example 3: CI/CD Pipeline with Service Principal
 
 ```bash
-# .env file
 AZURE_DEVOPS_AUTH_METHOD=azure-identity
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/mycompany
-AZURE_DEVOPS_DEFAULT_PROJECT=MyProject
 AZURE_TENANT_ID=00000000-0000-0000-0000-000000000000
 AZURE_CLIENT_ID=11111111-1111-1111-1111-111111111111
 AZURE_CLIENT_SECRET=your-client-secret
@@ -286,8 +279,6 @@ AZURE_CLIENT_SECRET=your-client-secret
 ### Example 4: Local Development with Azure CLI
 
 ```bash
-# .env file
 AZURE_DEVOPS_AUTH_METHOD=azure-cli
 AZURE_DEVOPS_ORG_URL=https://dev.azure.com/mycompany
-AZURE_DEVOPS_DEFAULT_PROJECT=MyProject
 ```

@@ -1,76 +1,99 @@
-# Azure DevOps MCP Server Tools Documentation
+# Azure DevOps MCP Server — Tools Documentation
 
-This directory contains documentation for all tools available in the Azure DevOps MCP server. Each tool is documented with examples, parameters, response formats, and error handling information.
+This directory documents every tool available in the server. Each page covers parameters, response format, error handling, and examples.
 
 ## Navigation
 
-- [Core Navigation Tools](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/core-navigation.md) - Overview of tools for navigating Azure DevOps resources
-  - [Organizations](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/organizations.md) - Tools for working with organizations
-  - [Projects](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/projects.md) - Tools for working with projects
-  - [Repositories](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/repositories.md) - Tools for working with Git repositories
-  - [Pull Requests](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md) - Tools for working with pull requests
-  - [Work Items](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/work-items.md) - Tools for working with work items
-  - [Pipelines](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md) - Tools for working with pipelines
-- [Resource URIs](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/resources.md) - Documentation for accessing repository content via resource URIs
+- [Core Navigation](./core-navigation.md) — hierarchy overview and discovery workflow
+- [Projects](./projects.md) — `list_projects`, `get_project`, `get_project_details`
+- [Repositories](./repositories.md) — `list_repositories`, `get_repository`, `get_file_content`, `create_branch`, `create_commit`, `list_commits`, `list_branches`, `list_tags`, tree tools
+- [Pull Requests](./pull-requests.md) — create, get, list, comment, update, checks, changes
+- [Work Items](./work-items.md) — get, create, update, list, comments, attachments, links
+- [Pipelines](./pipelines.md) — list, get, trigger, runs, logs, timeline, YAML, artifacts
+- [Wikis](./wiki.md) — get, create, list pages, get/update/create page
+- [Search](./search.md) — `search_code`, `search_wiki`, `search_work_items`
+- [Resource URIs](./resources.md) — accessing repository content via `ado://` URIs
 
 ## Tools by Category
 
-### Organization Tools
-
-- [`list_organizations`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/organizations.md#list_organizations) - List all Azure DevOps organizations accessible to the user
-
 ### Project Tools
-
-- [`list_projects`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/projects.md#list_projects) - List all projects in the organization
-- [`get_project`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/projects.md#get_project) - Get details of a specific project
+- [`list_projects`](./projects.md#list_projects) — list all projects in the collection
+- [`get_project`](./projects.md#get_project) — get a specific project by name or ID
+- [`get_project_details`](./projects.md#get_project_details) — get extended project info (teams, process, work item types)
 
 ### Repository Tools
-
-- [`list_repositories`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/repositories.md#list_repositories) - List all repositories in a project
-- [`get_repository`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/repositories.md#get_repository) - Get details of a specific repository
-- [`get_repository_details`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/repositories.md#get_repository_details) - Get detailed information about a repository
-- [`get_file_content`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/repositories.md#get_file_content) - Get content of a file or directory from a repository
+- [`list_repositories`](./repositories.md#list_repositories) — list all repos in a project
+- [`get_repository`](./repositories.md#get_repository) — get a specific repository
+- [`get_repository_details`](./repositories.md#get_repository_details) — get detailed repo info including statistics and refs
+- [`get_file_content`](./repositories.md#get_file_content) — get a file or directory listing
+- [`get_repository_tree`](./repositories.md#get_repository_tree) — get the full directory tree of a repository
+- [`get_all_repositories_tree`](./repositories.md#get_all_repositories_tree) — get tree across all repos in a project
+- [`create_branch`](./repositories.md#create_branch) — create a new branch
+- [`create_commit`](./repositories.md#create_commit) — commit file changes via patch or search/replace
+- [`list_commits`](./repositories.md#list_commits) — list commits on a branch
+- [`list_branches`](./repositories.md#list_branches) — list branches with optional filter
+- [`list_tags`](./repositories.md#list_tags) — list tags with optional filter
 
 ### Pull Request Tools
-
-- [`create_pull_request`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#create_pull_request) - Create a new pull request
-- [`get_pull_request`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request) - Get a pull request by ID
-- [`list_pull_requests`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#list_pull_requests) - List pull requests in a repository
-- [`add_pull_request_comment`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#add_pull_request_comment) - Add a comment to a pull request
-- [`get_pull_request_comments`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
-- [`update_pull_request`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
+- [`create_pull_request`](./pull-requests.md#create_pull_request) — create a new PR
+- [`get_pull_request`](./pull-requests.md#get_pull_request) — get a PR by ID
+- [`list_pull_requests`](./pull-requests.md#list_pull_requests) — list PRs with filters
+- [`add_pull_request_comment`](./pull-requests.md#add_pull_request_comment) — add a comment or reply to a thread
+- [`get_pull_request_comments`](./pull-requests.md#get_pull_request_comments) — get all comment threads
+- [`update_pull_request`](./pull-requests.md#update_pull_request) — update title, description, status, reviewers, work items
+- [`update_pull_request_thread_status`](./pull-requests.md#update_pull_request_thread_status) — set a thread's status
+- [`get_pull_request_changes`](./pull-requests.md#get_pull_request_changes) — get changed files and diffs
+- [`get_pull_request_checks`](./pull-requests.md#get_pull_request_checks) — get policy evaluations and status checks
 
 ### Work Item Tools
-
-- [`get_work_item`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/work-items.md#get_work_item) - Retrieve a work item by ID
-- [`create_work_item`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/work-items.md#create_work_item) - Create a new work item
-- [`list_work_items`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/work-items.md#list_work_items) - List work items in a project
-- [`create_work_item_attachment`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/work-items.md#create_work_item_attachment) - Upload and attach a file to a work item
-- [`get_work_item_attachment`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/work-items.md#get_work_item_attachment) - Download an attachment from a work item
-- [`delete_work_item_attachment`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/work-items.md#delete_work_item_attachment) - Delete an attachment from a work item
+- [`get_work_item`](./work-items.md#get_work_item) — get a work item by ID
+- [`create_work_item`](./work-items.md#create_work_item) — create a new work item
+- [`update_work_item`](./work-items.md#update_work_item) — update fields on a work item
+- [`list_work_items`](./work-items.md#list_work_items) — query work items via WIQL or saved query
+- [`get_work_item_comments`](./work-items.md#get_work_item_comments) — get comments on a work item
+- [`create_work_item_attachment`](./work-items.md#create_work_item_attachment) — upload and attach a file
+- [`get_work_item_attachment`](./work-items.md#get_work_item_attachment) — download an attachment
+- [`delete_work_item_attachment`](./work-items.md#delete_work_item_attachment) — delete an attachment
+- [`manage_work_item_link`](./work-items.md#manage_work_item_link) — add, update, or remove work item links
 
 ### Pipeline Tools
+- [`list_pipelines`](./pipelines.md#list_pipelines) — list pipelines in a project
+- [`get_pipeline`](./pipelines.md#get_pipeline) — get pipeline definition details
+- [`list_pipeline_runs`](./pipelines.md#list_pipeline_runs) — list runs with filters (branch, state, result, date)
+- [`get_pipeline_run`](./pipelines.md#get_pipeline_run) — get detailed run info including artifacts
+- [`trigger_pipeline`](./pipelines.md#trigger_pipeline) — trigger a pipeline run
+- [`pipeline_timeline`](./pipelines.md#pipeline_timeline) — get stage/job/task timeline for a run
+- [`get_pipeline_log`](./pipelines.md#get_pipeline_log) — get log content for a specific log ID
+- [`download_pipeline_artifact`](./pipelines.md#download_pipeline_artifact) — download a file from pipeline artifacts
+- [`get_pipeline_run_yaml`](./pipelines.md#get_pipeline_run_yaml) — resolve the full YAML including templates
+- [`get_pipeline_run_sources`](./pipelines.md#get_pipeline_run_sources) — get source repositories used in a run
+- [`get_pipeline_run_stage_tasks`](./pipelines.md#get_pipeline_run_stage_tasks) — get task details per stage/job
 
-- [`list_pipelines`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#list_pipelines) - List all pipelines in a project
-- [`get_pipeline`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#get_pipeline) - Get details of a specific pipeline
-- [`list_pipeline_runs`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#list_pipeline_runs) - List recent runs for a pipeline with filters
-- [`get_pipeline_run`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#get_pipeline_run) - Get detailed information about a specific run
-- [`download_pipeline_artifact`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#download_pipeline_artifact) - Download a file from pipeline artifacts as text
-- [`pipeline_timeline`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#pipeline_timeline) - Retrieve the stage/job timeline for a run
-- [`get_pipeline_log`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#get_pipeline_log) - Retrieve log contents in plain or JSON formats
-- [`trigger_pipeline`](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/pipelines.md#trigger_pipeline) - Trigger a pipeline run with customizable parameters
+### Wiki Tools
+- [`get_wikis`](./wiki.md#get_wikis) — list wikis in a project
+- [`create_wiki`](./wiki.md#create_wiki) — create a new wiki
+- [`get_wiki_page`](./wiki.md#get_wiki_page) — get a wiki page's markdown content
+- [`create_wiki_page`](./wiki.md#create_wiki_page) — create a new wiki page
+- [`update_wiki_page`](./wiki.md#update_wiki_page) — update a wiki page
+- [`list_wiki_pages`](./wiki.md#list_wiki_pages) — list all pages in a wiki
 
-## Tool Structure
+### Search Tools
+- [`search_code`](./search.md#search_code) — full-text code search across repositories
+- [`search_wiki`](./search.md#search_wiki) — search wiki pages
+- [`search_work_items`](./search.md#search_work_items) — search work items
 
-Each tool documentation follows a consistent structure:
+### Infrastructure Tools
+- [`list_environments`](./pipelines.md#list_environments) — list deployment environments
+- [`list_libraries`](./pipelines.md#list_libraries) — list variable groups (Libraries)
+- [`list_service_connections`](./pipelines.md#list_service_connections) — list service endpoints
 
-1. **Description**: Brief explanation of what the tool does
-2. **Parameters**: Required and optional parameters with explanations
-3. **Response**: Expected response format with examples
-4. **Error Handling**: Potential errors and how they're handled
-5. **Example Usage**: Code examples showing how to use the tool
-6. **Implementation Details**: Technical details about how the tool works
+## Removed Tools
 
-## Examples
+The following tools were **removed** because they call Azure DevOps Services-only APIs that do not exist on on-premises servers:
 
-Examples of using multiple tools together can be found in the [Core Navigation Tools](https://github.com/tiberriver256/mcp-server-azure-devops/blob/main/docs/tools/core-navigation.md#common-use-cases) documentation.
+| Tool | Reason |
+|------|--------|
+| `list_organizations` | Calls `app.vssps.visualstudio.com` — cloud only |
+| `get_me` | Calls `vssps.dev.azure.com` — cloud only |
+
+Use `list_projects` to discover what's available on your server.

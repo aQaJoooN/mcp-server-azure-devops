@@ -2,9 +2,7 @@
 
 A Model Context Protocol (MCP) server implementation for Azure DevOps, allowing AI assistants to interact with Azure DevOps APIs through a standardized protocol.
 
-> **Looking for the official server?** Microsoft maintains a product-supported Azure DevOps MCP at [microsoft/azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp). If you use Azure DevOps Services (cloud), start there.
->
-> This community server remains a good fit when you need **Azure DevOps Server (on-premises)** support — especially older versions that may not work with Microsoft's MCP — or features not yet available in the official server. See [Discussion #237](https://github.com/aQaJoooN/mcp-server-azure-devops/discussions/237) for more context. See [ROADMAP.md](./ROADMAP.md) for where this server differentiates and what is planned.
+> **On-premises only.** This server targets **Azure DevOps Server (on-premises)** exclusively. Tools that call Azure DevOps Services-only APIs (`list_organizations`, `get_me`) have been removed. If you use Azure DevOps Services (cloud), consider [microsoft/azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp).
 
 ## Overview
 
@@ -92,7 +90,7 @@ docker run -p 8888:3000 \
   -e AZURE_DEVOPS_ORG_URL="https://your-server/tfs/YourCollection" \
   -e AZURE_DEVOPS_AUTH_METHOD=pat \
   -e AZURE_DEVOPS_PAT="<token>" \
-  -e AZURE_DEVOPS_DEFAULT_PROJECT="YourProject" \
+  -e AZURE_DEVOPS_API_VERSION="6.0" \
   mcp-server-azure-devops:local
 
 # Health check
@@ -106,8 +104,8 @@ curl -s -X POST http://localhost:8888/mcp \
 ```
 
 > **On-prem URL format**: `AZURE_DEVOPS_ORG_URL` must be the **collection** URL only —
-> `https://host/tfs/Collection`. The project name goes separately in `AZURE_DEVOPS_DEFAULT_PROJECT`.
-> Do **not** include the project in the org URL.
+> `https://host/tfs/Collection`. Do **not** include the project in the org URL.
+> Every tool that targets a project requires `projectId` explicitly in the call arguments.
 
 ### Usage with Claude Desktop/Cursor AI
 
@@ -124,9 +122,8 @@ Be sure you are logged in to Azure CLI with `az login` then add the following:
       "command": "npx",
       "args": ["-y", "@aqajooon/mcp-server-azure-devops"],
       "env": {
-        "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/your-organization",
-        "AZURE_DEVOPS_AUTH_METHOD": "azure-identity",
-        "AZURE_DEVOPS_DEFAULT_PROJECT": "your-project-name"
+        "AZURE_DEVOPS_ORG_URL": "https://your-server/tfs/YourCollection",
+        "AZURE_DEVOPS_AUTH_METHOD": "azure-identity"
       }
     }
   }
@@ -142,17 +139,16 @@ Be sure you are logged in to Azure CLI with `az login` then add the following:
       "command": "npx",
       "args": ["-y", "@aqajooon/mcp-server-azure-devops"],
       "env": {
-        "AZURE_DEVOPS_ORG_URL": "https://dev.azure.com/your-organization",
+        "AZURE_DEVOPS_ORG_URL": "https://your-server/tfs/YourCollection",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
-        "AZURE_DEVOPS_PAT": "<YOUR_PAT>",
-        "AZURE_DEVOPS_DEFAULT_PROJECT": "your-project-name"
+        "AZURE_DEVOPS_PAT": "<YOUR_PAT>"
       }
     }
   }
 }
 ```
 
-Azure DevOps Server (on-prem) requires PAT authentication. Example:
+Azure DevOps Server (on-prem) example:
 
 ```json
 {
@@ -164,7 +160,7 @@ Azure DevOps Server (on-prem) requires PAT authentication. Example:
         "AZURE_DEVOPS_ORG_URL": "https://server:8080/tfs/DefaultCollection",
         "AZURE_DEVOPS_AUTH_METHOD": "pat",
         "AZURE_DEVOPS_PAT": "<YOUR_PAT>",
-        "AZURE_DEVOPS_DEFAULT_PROJECT": "your-project-name"
+        "AZURE_DEVOPS_API_VERSION": "6.0"
       }
     }
   }
@@ -196,14 +192,15 @@ Key environment variables include:
 | Variable                       | Description                                                                        | Required                     | Default          |
 | ------------------------------ | ---------------------------------------------------------------------------------- | ---------------------------- | ---------------- |
 | `AZURE_DEVOPS_AUTH_METHOD`     | Authentication method (`pat`, `azure-identity`, or `azure-cli`) - case-insensitive | No                           | `azure-identity` |
-| `AZURE_DEVOPS_ORG_URL`         | Full URL to your Azure DevOps organization or Server collection (e.g., `https://server:8080/tfs/DefaultCollection`) | Yes                          | -                |
-| `AZURE_DEVOPS_PAT`             | Personal Access Token (for PAT auth)                                               | Only with PAT auth           | -                |
-| `AZURE_DEVOPS_DEFAULT_PROJECT` | Default project if none specified                                                  | No                           | -                |
-| `AZURE_DEVOPS_API_VERSION`     | REST api-version for the tools that call the REST API directly ([per-release values](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/authentication.md#rest-api-version)) | No                           | `7.1`            |
-| `AZURE_TENANT_ID`              | Azure AD tenant ID (for service principals)                                        | Only with service principals | -                |
-| `AZURE_CLIENT_ID`              | Azure AD application ID (for service principals)                                   | Only with service principals | -                |
-| `AZURE_CLIENT_SECRET`          | Azure AD client secret (for service principals)                                    | Only with service principals | -                |
-| `LOG_LEVEL`                    | Logging level (debug, info, warn, error)                                           | No                           | info             |
+| `AZURE_DEVOPS_ORG_URL`         | Collection URL e.g. `https://host/tfs/Collection` — do **not** include the project | Yes                          | —                |
+| `AZURE_DEVOPS_PAT`             | Personal Access Token (required when auth=pat)                                     | Only with PAT auth           | —                |
+| `AZURE_DEVOPS_API_VERSION`     | REST api-version override (e.g. `6.0` for ADO Server 2019/2020, `7.0` for 2022)   | No                           | `7.1`            |
+| `AZURE_TENANT_ID`              | Azure AD tenant ID (service principal auth)                                        | Only with service principals | —                |
+| `AZURE_CLIENT_ID`              | Azure AD application ID (service principal auth)                                   | Only with service principals | —                |
+| `AZURE_CLIENT_SECRET`          | Azure AD client secret (service principal auth)                                    | Only with service principals | —                |
+| `LOG_LEVEL`                    | Logging level (`debug`, `info`, `warn`, `error`)                                   | No                           | `info`           |
+
+> **`AZURE_DEVOPS_DEFAULT_PROJECT` has been removed.** Every tool that targets a project requires an explicit `projectId` parameter. This prevents silent fallback to a wrong project.
 
 ## Troubleshooting Authentication
 
@@ -222,89 +219,80 @@ For technical details about how authentication is implemented in the Azure DevOp
 
 ## Available Tools
 
-The Azure DevOps MCP server provides a variety of tools for interacting with Azure DevOps resources. For detailed documentation on each tool, please refer to the corresponding documentation.
+For full documentation see [docs/tools/README.md](./docs/tools/README.md).
 
-### User Tools
-
-- `get_me`: Get details of the authenticated user (id, displayName, email) (Azure DevOps Services only)
-
-### Organization Tools
-
-- `list_organizations`: List all accessible organizations (Azure DevOps Services only)
+> **Removed (cloud-only):** `list_organizations` and `get_me` called Azure DevOps Services APIs that do not exist on on-premises servers. Both have been removed. Use `list_projects` to discover what's available on your server.
 
 ### Project Tools
-
-- `list_projects`: List all projects in an organization
-- `get_project`: Get details of a specific project
-- `get_project_details`: Get comprehensive details of a project including process, work item types, and teams
+- `list_projects` — list all projects in the collection
+- `get_project` — get a specific project by name or ID
+- `get_project_details` — extended info (teams, process, work item types)
 
 ### Repository Tools
-
-- `list_repositories`: List all repositories in a project
-- `get_repository`: Get details of a specific repository
-- `get_repository_details`: Get detailed information about a repository including statistics and refs
-- `get_file_content`: Get content of a file or directory from a repository
-- `get_repository_tree`: List a repository's file tree from any path and depth
-- `list_branches`: List branches in a repository with optional prefix filter
-- `list_tags`: List tags in a repository with optional prefix filter
-- `list_commits`: List recent commits on a branch with file-level diff content
-- `create_branch`: Create a new branch from an existing one
-- `create_commit`: Commit multiple file changes to a branch using unified diffs or search/replace instructions
-
-### Work Item Tools
-
-- `get_work_item`: Retrieve a work item by ID
-- `create_work_item`: Create a new work item
-- `update_work_item`: Update an existing work item
-- `list_work_items`: List work items in a project
-- `manage_work_item_link`: Add, remove, or update links between work items
-- `create_work_item_attachment`: Upload and attach a file to a work item
-- `get_work_item_attachment`: Download an attachment from a work item
-- `delete_work_item_attachment`: Delete an attachment from a work item
-
-### Search Tools
-
-- `search_code`: Search for code across repositories in a project
-- `search_wiki`: Search for content across wiki pages in a project
-- `search_work_items`: Search for work items across projects in Azure DevOps
-
-### Pipelines Tools
-
-- `list_pipelines`: List pipelines in a project
-- `get_pipeline`: Get details of a specific pipeline
-- `list_pipeline_runs`: List recent runs for a pipeline with optional filters
-- `get_pipeline_run`: Get detailed run information and artifact summaries
-- `download_pipeline_artifact`: Download a single artifact file as text
-- `pipeline_timeline`: Retrieve the stage and job timeline for a run
-- `get_pipeline_log`: Retrieve raw or JSON-formatted log content by logId
-- `get_pipeline_run_yaml`: Get the fully-expanded YAML that was executed for a run
-- `get_pipeline_run_sources`: Get the source repositories, branches, and commit versions used in a run
-- `get_pipeline_run_stage_tasks`: Get the task hierarchy (stage → job → task) for a run, with logIds for each task
-- `trigger_pipeline`: Trigger a pipeline run with customizable parameters
-
-### Project Resource Tools
-
-- `list_environments`: List deployment environments in a project (approval gates, VMs, Kubernetes)
-- `list_libraries`: List variable groups (Libraries) in a project
-- `list_service_connections`: List service connections (endpoints) used by pipelines in a project
-
-### Wiki Tools
-
-- `get_wikis`: List all wikis in a project
-- `get_wiki_page`: Get content of a specific wiki page as plain text
+- `list_repositories` — list all repos in a project
+- `get_repository` — get a specific repository
+- `get_repository_details` — repo statistics, refs, branch info
+- `get_file_content` — get a file or directory listing from any branch/tag/commit
+- `get_repository_tree` — full directory tree from any path and depth
+- `get_all_repositories_tree` — tree across all repos in a project
+- `list_branches` — list branches with optional prefix filter
+- `list_tags` — list tags with optional prefix filter
+- `list_commits` — list commits on a branch
+- `create_branch` — create a branch from an existing one
+- `create_commit` — commit file changes via unified diff or search/replace
 
 ### Pull Request Tools
+- `create_pull_request` — create a new PR
+- `get_pull_request` — get a PR by ID
+- `list_pull_requests` — list PRs with filters (status, reviewer, branch, etc.)
+- `add_pull_request_comment` — add a comment or file-level inline comment
+- `get_pull_request_comments` — get all comment threads
+- `update_pull_request` — update title, description, status, reviewers, work items
+- `update_pull_request_thread_status` — resolve, close, or reopen a thread
+- `get_pull_request_changes` — list changed files and diffs
+- `get_pull_request_checks` — policy evaluations and status checks
 
-- [`create_pull_request`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#create_pull_request) - Create a new pull request
-- [`get_pull_request`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request) - Get a pull request by ID
-- [`list_pull_requests`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#list_pull_requests) - List pull requests in a repository
-- [`add_pull_request_comment`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#add_pull_request_comment) - Add a comment to a pull request
-- [`get_pull_request_comments`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_comments) - Get comments from a pull request
-- [`update_pull_request`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#update_pull_request) - Update an existing pull request (title, description, status, draft state, reviewers, work items)
-- [`get_pull_request_changes`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_changes) - List changes in a pull request and policy evaluation status
-- [`get_pull_request_checks`](https://github.com/aQaJoooN/mcp-server-azure-devops/blob/main/docs/tools/pull-requests.md#get_pull_request_checks) - Summarize status checks, policy evaluations, and their related pipelines
+### Work Item Tools
+- `get_work_item` — get a work item by ID
+- `create_work_item` — create a new work item
+- `update_work_item` — update fields, state, tags, assignee
+- `list_work_items` — query via WIQL or saved query ID
+- `get_work_item_comments` — get comments on a work item
+- `manage_work_item_link` — add, update, or remove work item links
+- `create_work_item_attachment` — upload and attach a file
+- `get_work_item_attachment` — download an attachment
+- `delete_work_item_attachment` — delete an attachment
 
-For comprehensive documentation on all tools, see the [Tools Documentation](https://github.com/aQaJoooN/mcp-server-azure-devops/tree/main/docs/tools).
+### Pipeline Tools
+- `list_pipelines` — list pipelines in a project
+- `get_pipeline` — get pipeline definition details
+- `list_pipeline_runs` — list runs with filters (branch, state, result, date range)
+- `get_pipeline_run` — get detailed run info and artifact summaries
+- `trigger_pipeline` — trigger a run with custom variables and parameters
+- `pipeline_timeline` — stage/job/task timeline for a run
+- `get_pipeline_log` — get log content by logId (plain or JSON)
+- `download_pipeline_artifact` — download a file from pipeline artifacts
+- `get_pipeline_run_yaml` — resolve the full YAML including all templates
+- `get_pipeline_run_sources` — source repos, branches, and commit versions used in a run
+- `get_pipeline_run_stage_tasks` — task hierarchy with logIds per stage/job
+
+### Infrastructure Tools
+- `list_environments` — list deployment environments (approval gates, Kubernetes, VMs)
+- `list_libraries` — list variable groups
+- `list_service_connections` — list service endpoints used by pipelines
+
+### Wiki Tools
+- `get_wikis` — list wikis in a project
+- `create_wiki` — create a project or code wiki
+- `get_wiki_page` — get a page's markdown content
+- `create_wiki_page` — create a new wiki page
+- `update_wiki_page` — update a wiki page
+- `list_wiki_pages` — list all pages in a wiki
+
+### Search Tools
+- `search_code` — full-text code search across repositories
+- `search_wiki` — search wiki pages
+- `search_work_items` — search work items
 
 ## Contributing
 
