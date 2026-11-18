@@ -2,11 +2,19 @@ import { z } from 'zod';
 
 export const GetPipelineRunSourcesSchema = z.object({
   projectId: z.string().describe('The ID or name of the project'),
-  runId: z.number().int().min(1).describe('The pipeline run ID'),
+  runId: z
+    .number()
+    .int()
+    .min(1)
+    .describe(
+      'Pipeline run / build ID (e.g. 1238038). Large integer — copy the exact value from the build context, do not truncate it.',
+    ),
   pipelineId: z
     .number()
     .int()
     .min(1)
     .optional()
-    .describe('Optional pipeline ID for context'),
+    .describe(
+      'Optional pipeline ID for context. Copy the exact integer — do not shorten or truncate it.',
+    ),
 });

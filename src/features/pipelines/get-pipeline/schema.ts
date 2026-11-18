@@ -11,7 +11,9 @@ export const GetPipelineSchema = z.object({
     .number()
     .int()
     .positive()
-    .describe('The numeric ID of the pipeline to retrieve'),
+    .describe(
+      'The numeric pipeline definition ID (e.g. 7426). Copy the exact integer from the build context — do not shorten or truncate it.',
+    ),
   // The version of the pipeline to retrieve
   pipelineVersion: z
     .number()

@@ -2,7 +2,13 @@ import { z } from 'zod';
 
 export const ListPipelineRunsSchema = z.object({
   projectId: z.string().describe('The ID or name of the project'),
-  pipelineId: z.number().int().min(1).describe('Pipeline numeric ID'),
+  pipelineId: z
+    .number()
+    .int()
+    .min(1)
+    .describe(
+      'Pipeline numeric ID (e.g. 7426). Copy the exact integer from the build context — do not shorten or truncate it.',
+    ),
   top: z
     .number()
     .int()
