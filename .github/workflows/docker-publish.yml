@@ -3,7 +3,7 @@ name: Docker Publish
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'mcp-server-azure-devops-v*.*.*'
 
 permissions:
   contents: read
@@ -20,8 +20,8 @@ jobs:
       - name: Extract version from tag
         id: meta
         run: |
-          TAG="${GITHUB_REF_NAME}"          # e.g. v0.2.1
-          VERSION="${TAG#v}"                # e.g. 0.2.1
+          TAG="${GITHUB_REF_NAME}"                        # e.g. mcp-server-azure-devops-v0.2.2
+          VERSION="${TAG##*-v}"                           # e.g. 0.2.2
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
