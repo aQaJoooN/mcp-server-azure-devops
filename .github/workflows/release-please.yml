@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Git tag to publish (e.g., mcp-server-azure-devops-v0.1.44). Leave empty to run normal release-please process.'
+        description: 'Git tag to publish (e.g., mcp-server-azure-devops-v0.2.2). Leave empty to run normal release-please process.'
         required: false
         type: string
 
@@ -20,11 +20,18 @@ permissions:
   issues: write
   id-token: write
 
+env:
+  IMAGE_NAME: mcp-server-azure-devops
+
 jobs:
+  # ── Step 1: Run release-please to create/update the release PR ───────────
   release-please:
     runs-on: ubuntu-latest
-    # Only run release-please if no tag was specified (normal automated flow)
     if: ${{ github.event.inputs.tag == '' || github.event.inputs.tag == null }}
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
@@ -32,47 +39,75 @@ jobs:
           config-file: .github/release-please-config.json
           manifest-file: .github/release-please-manifest.json
 
-      # The following steps only run if a new release is created
-      - name: Checkout code
-        if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v7
+  # ── Step 2: Publish to npm (runs only when a release is created) ─────────
+  npm-publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.release.outputs.tag_name }}
+          ref: ${{ needs.release-please.outputs.tag_name }}
 
       - name: Setup Node.js
-        if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Install Dependencies
-        if: ${{ steps.release.outputs.release_created }}
         run: npm ci
 
-      - name: Build package
-        if: ${{ steps.release.outputs.release_created }}
+      - name: Build
         run: npm run build
 
       - name: Publish to npm
-        if: ${{ steps.release.outputs.release_created }}
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # Manual publish job - runs when a tag is manually specified
+  # ── Step 3: Build and push Docker image (runs only when a release is created) ──
+  docker-publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.release-please.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Manual publish (when a tag is manually specified via workflow_dispatch) ──
   manual-publish:
     runs-on: ubuntu-latest
-    # Only run if a tag was manually specified
     if: ${{ github.event.inputs.tag != '' && github.event.inputs.tag != null }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           registry-url: 'https://registry.npmjs.org/'
@@ -80,7 +115,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build package
+      - name: Build
         run: npm run build
 
       - name: Publish to npm
