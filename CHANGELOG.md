@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.2](https://github.com/aQaJoooN/mcp-server-azure-devops/compare/mcp-server-azure-devops-v0.2.1...mcp-server-azure-devops-v0.2.2) (2026-11-18)
+
+
+### Bug Fixes
+
+* **ci:** fix docker-publish tag pattern to match release-please tag format ([7704376](https://github.com/aQaJoooN/mcp-server-azure-devops/commit/770437627724bd2420ddd6e765212e8989670a98))
+* replace internal Nexus registry URLs with public npm registry in lockfile ([b0cce1b](https://github.com/aQaJoooN/mcp-server-azure-devops/commit/b0cce1b3c1d2375d72d3290542de65a3d6377e93))
+* resolve security vulnerabilities and restructure CI/Docker workflows ([598f48f](https://github.com/aQaJoooN/mcp-server-azure-devops/commit/598f48f5b1d8c971d9f03f497f000f8c88119e56))
+
 ## [0.2.1](https://github.com/aQaJoooN/mcp-server-azure-devops/compare/mcp-server-azure-devops-v0.2.0...mcp-server-azure-devops-v0.2.1) (2026-11-17)
 
 
