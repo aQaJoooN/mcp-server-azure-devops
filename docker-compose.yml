@@ -13,6 +13,9 @@ services:
       AZURE_DEVOPS_API_VERSION: "${AZURE_DEVOPS_API_VERSION:-}"
       PORT: "3000"
       MCP_PATH: "/mcp"
+      MCP_AUTH_TOKEN: "${MCP_AUTH_TOKEN:-}"
+      MCP_READ_ONLY: "${MCP_READ_ONLY:-false}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
       interval: 30s
