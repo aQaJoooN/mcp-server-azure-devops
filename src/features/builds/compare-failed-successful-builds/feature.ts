@@ -34,7 +34,11 @@ export async function compareFailedSuccessfulBuilds(
   branchName?: string,
 ): Promise<CompareFailedSuccessfulResult> {
   try {
-    const failedBuild = await getBuildDetails(connection, projectId, failedBuildId);
+    const failedBuild = await getBuildDetails(
+      connection,
+      projectId,
+      failedBuildId,
+    );
 
     const resolvedDefinitionId = definitionId ?? failedBuild.definition?.id;
     if (!resolvedDefinitionId) {
@@ -46,11 +50,20 @@ export async function compareFailedSuccessfulBuilds(
     const resolvedBranch = branchName ?? failedBuild.sourceBranch;
 
     const [lastSuccessful, changesInFailedBuild] = await Promise.all([
-      getLastSuccessfulBuild(connection, projectId, resolvedDefinitionId, resolvedBranch),
+      getLastSuccessfulBuild(
+        connection,
+        projectId,
+        resolvedDefinitionId,
+        resolvedBranch,
+      ),
       getBuildChanges(connection, projectId, failedBuildId),
     ]);
 
-    const differences: { field: string; failed: unknown; successful: unknown }[] = [];
+    const differences: {
+      field: string;
+      failed: unknown;
+      successful: unknown;
+    }[] = [];
     if (lastSuccessful) {
       for (const field of COMPARE_FIELDS) {
         const vFailed = failedBuild[field];
@@ -71,8 +84,14 @@ export async function compareFailedSuccessfulBuilds(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
     }
     throw new AzureDevOpsError(

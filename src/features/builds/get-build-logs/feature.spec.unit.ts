@@ -7,7 +7,10 @@ import { getBuildLogs } from './feature';
 
 function makeConn(statusCode: number, result: unknown) {
   const rest = { get: jest.fn().mockResolvedValue({ statusCode, result }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -16,7 +19,13 @@ function makeConn(statusCode: number, result: unknown) {
 
 describe('getBuildLogs', () => {
   it('returns log list on success', async () => {
-    const mockLogs = { count: 2, value: [{ id: 1, type: 'Container' }, { id: 2, type: 'Task' }] };
+    const mockLogs = {
+      count: 2,
+      value: [
+        { id: 1, type: 'Container' },
+        { id: 2, type: 'Task' },
+      ],
+    };
     const conn = makeConn(200, mockLogs);
     const result = await getBuildLogs(conn, 'proj', 10);
     expect(result).toEqual(mockLogs.value);
@@ -44,19 +53,26 @@ describe('getBuildLogs', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getBuildLogs(conn, 'proj', 1)).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getBuildLogs(conn, 'proj', 1)).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 
   it('throws AuthenticationError on 401 message', async () => {
-    const { AzureDevOpsAuthenticationError } = await import('../../../shared/errors');
+    const { AzureDevOpsAuthenticationError } =
+      await import('../../../shared/errors');
     const buildApi = {
       createRequestOptions: jest.fn().mockReturnValue({}),
-      rest: { get: jest.fn().mockRejectedValue(new Error('401 unauthorized access')) },
+      rest: {
+        get: jest.fn().mockRejectedValue(new Error('401 unauthorized access')),
+      },
     };
     const conn = {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getBuildLogs(conn, 'proj', 1)).rejects.toBeInstanceOf(AzureDevOpsAuthenticationError);
+    await expect(getBuildLogs(conn, 'proj', 1)).rejects.toBeInstanceOf(
+      AzureDevOpsAuthenticationError,
+    );
   });
 });

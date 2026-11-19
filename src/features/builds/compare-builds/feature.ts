@@ -31,7 +31,10 @@ async function fetchBuild(
     `${baseUrl}/`,
   );
   url.searchParams.set('api-version', apiVersion);
-  const requestOptions = buildApi.createRequestOptions('application/json', apiVersion);
+  const requestOptions = buildApi.createRequestOptions(
+    'application/json',
+    apiVersion,
+  );
   const response = await buildApi.rest.get<BuildSummary | null>(
     url.toString(),
     requestOptions,
@@ -90,8 +93,14 @@ export async function compareBuilds(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
     }
     throw new AzureDevOpsError(

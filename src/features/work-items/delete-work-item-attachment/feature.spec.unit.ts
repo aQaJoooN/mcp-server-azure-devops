@@ -45,7 +45,10 @@ describe('deleteWorkItemAttachment', () => {
     };
     const conn = makeConn(makeWitApi(workItem));
     await expect(
-      deleteWorkItemAttachment(conn, { workItemId: 1, attachmentId: 'missing-attachment-id' }),
+      deleteWorkItemAttachment(conn, {
+        workItemId: 1,
+        attachmentId: 'missing-attachment-id',
+      }),
     ).rejects.toThrow('not found');
   });
 
@@ -58,11 +61,17 @@ describe('deleteWorkItemAttachment', () => {
         { rel: 'Parent', url: 'https://ado/workitems/5' },
       ],
     };
-    const updatedWorkItem = { id: 1, relations: [{ rel: 'Parent', url: 'https://ado/workitems/5' }] };
+    const updatedWorkItem = {
+      id: 1,
+      relations: [{ rel: 'Parent', url: 'https://ado/workitems/5' }],
+    };
     const witApi = makeWitApi(workItem, updatedWorkItem);
     const conn = makeConn(witApi);
 
-    const result = await deleteWorkItemAttachment(conn, { workItemId: 1, attachmentId });
+    const result = await deleteWorkItemAttachment(conn, {
+      workItemId: 1,
+      attachmentId,
+    });
     expect(result).toEqual(updatedWorkItem);
     expect(witApi.updateWorkItem).toHaveBeenCalledWith(
       {},
@@ -80,7 +89,9 @@ describe('deleteWorkItemAttachment', () => {
     const attachmentId = 'attach-456';
     const workItem = {
       id: 1,
-      relations: [{ rel: 'AttachedFile', url: `https://ado/attachments/${attachmentId}` }],
+      relations: [
+        { rel: 'AttachedFile', url: `https://ado/attachments/${attachmentId}` },
+      ],
     };
     const witApi = makeWitApi(workItem, null);
     const conn = makeConn(witApi);

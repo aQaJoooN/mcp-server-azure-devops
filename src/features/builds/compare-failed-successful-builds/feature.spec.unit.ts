@@ -45,7 +45,9 @@ describe('compareFailedSuccessfulBuilds', () => {
     expect(result.lastSuccessfulBuild).toEqual(successfulBuild);
     expect(result.changesInFailedBuild).toEqual(changes);
     expect(result.differences.some((d) => d.field === 'result')).toBe(true);
-    expect(result.differences.some((d) => d.field === 'buildNumber')).toBe(true);
+    expect(result.differences.some((d) => d.field === 'buildNumber')).toBe(
+      true,
+    );
   });
 
   it('returns empty differences when no successful build found', async () => {
@@ -66,7 +68,12 @@ describe('compareFailedSuccessfulBuilds', () => {
     (getBuildChanges as jest.Mock).mockResolvedValue([]);
 
     await compareFailedSuccessfulBuilds(mockConn, 'proj', 12, 99, 'feature');
-    expect(getLastSuccessfulBuild).toHaveBeenCalledWith(mockConn, 'proj', 99, 'feature');
+    expect(getLastSuccessfulBuild).toHaveBeenCalledWith(
+      mockConn,
+      'proj',
+      99,
+      'feature',
+    );
   });
 
   it('throws ResourceNotFoundError when definition ID cannot be determined', async () => {
@@ -88,7 +95,9 @@ describe('compareFailedSuccessfulBuilds', () => {
   });
 
   it('wraps unknown errors in AzureDevOpsError', async () => {
-    (getBuildDetails as jest.Mock).mockRejectedValue(new Error('connection reset'));
+    (getBuildDetails as jest.Mock).mockRejectedValue(
+      new Error('connection reset'),
+    );
 
     await expect(
       compareFailedSuccessfulBuilds(mockConn, 'proj', 99),

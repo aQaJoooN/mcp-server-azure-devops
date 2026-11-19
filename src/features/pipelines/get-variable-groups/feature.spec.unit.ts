@@ -8,7 +8,10 @@ import { getVariableGroups } from './feature';
 
 function makeConn(statusCode: number, result: unknown) {
   const rest = { get: jest.fn().mockResolvedValue({ statusCode, result }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -40,8 +43,16 @@ describe('getVariableGroups', () => {
   });
 
   it('applies optional groupName and top', async () => {
-    const rest = { get: jest.fn().mockResolvedValue({ statusCode: 200, result: { count: 0, value: [] } }) };
-    const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+    const rest = {
+      get: jest.fn().mockResolvedValue({
+        statusCode: 200,
+        result: { count: 0, value: [] },
+      }),
+    };
+    const buildApi = {
+      createRequestOptions: jest.fn().mockReturnValue({}),
+      rest,
+    };
     const conn = {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
@@ -68,7 +79,9 @@ describe('getVariableGroups', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getVariableGroups(conn, 'proj')).rejects.toBeInstanceOf(AzureDevOpsAuthenticationError);
+    await expect(getVariableGroups(conn, 'proj')).rejects.toBeInstanceOf(
+      AzureDevOpsAuthenticationError,
+    );
   });
 
   it('throws ResourceNotFoundError on "not found" message', async () => {
@@ -80,7 +93,9 @@ describe('getVariableGroups', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getVariableGroups(conn, 'proj')).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
+    await expect(getVariableGroups(conn, 'proj')).rejects.toBeInstanceOf(
+      AzureDevOpsResourceNotFoundError,
+    );
   });
 
   it('wraps unknown errors in AzureDevOpsError', async () => {
@@ -92,11 +107,16 @@ describe('getVariableGroups', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getVariableGroups(conn, 'proj')).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getVariableGroups(conn, 'proj')).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 
   it('handles groups without variables', async () => {
-    const conn = makeConn(200, { count: 1, value: [{ id: 2, name: 'EmptyGroup' }] });
+    const conn = makeConn(200, {
+      count: 1,
+      value: [{ id: 2, name: 'EmptyGroup' }],
+    });
     const result = await getVariableGroups(conn, 'proj');
     expect(result[0].variables).toBeUndefined();
   });

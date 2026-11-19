@@ -16,14 +16,23 @@ export interface AgentEnvironmentSummary {
   userCapabilities: Record<string, string>;
 }
 
-const SECRET_KEYWORDS = ['token', 'secret', 'password', 'key', 'pat', 'credential'];
+const SECRET_KEYWORDS = [
+  'token',
+  'secret',
+  'password',
+  'key',
+  'pat',
+  'credential',
+];
 
 function isSensitive(key: string): boolean {
   const lower = key.toLowerCase();
   return SECRET_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
-function sanitize(caps: Record<string, string> | undefined): Record<string, string> {
+function sanitize(
+  caps: Record<string, string> | undefined,
+): Record<string, string> {
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(caps ?? {})) {
     if (!isSensitive(key)) {
@@ -54,10 +63,20 @@ export async function getAgentEnvironmentSummary(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Agent ${agentId} not found in pool ${poolId}: ${error.message}`,
         );

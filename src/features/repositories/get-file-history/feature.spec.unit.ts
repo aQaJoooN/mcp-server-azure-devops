@@ -20,13 +20,21 @@ describe('getFileHistory', () => {
       {
         commitId: 'abc1',
         comment: 'update file',
-        author: { name: 'Alice', email: 'alice@test.com', date: new Date('2024-01-01') },
+        author: {
+          name: 'Alice',
+          email: 'alice@test.com',
+          date: new Date('2024-01-01'),
+        },
         url: 'https://ado/commits/abc1',
       },
       {
         commitId: 'abc2',
         comment: 'initial',
-        author: { name: 'Bob', email: 'bob@test.com', date: new Date('2023-12-01') },
+        author: {
+          name: 'Bob',
+          email: 'bob@test.com',
+          date: new Date('2023-12-01'),
+        },
         url: 'https://ado/commits/abc2',
       },
     ];
@@ -52,15 +60,15 @@ describe('getFileHistory', () => {
 
   it('throws ResourceNotFoundError when commits is null', async () => {
     const conn = makeConn(null);
-    await expect(getFileHistory(conn, 'proj', 'repo', '/src/f.ts')).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      getFileHistory(conn, 'proj', 'repo', '/src/f.ts'),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('wraps unknown errors in AzureDevOpsError', async () => {
     const conn = makeConn(null, new Error('network error'));
-    await expect(getFileHistory(conn, 'proj', 'repo', '/src/f.ts')).rejects.toBeInstanceOf(
-      AzureDevOpsError,
-    );
+    await expect(
+      getFileHistory(conn, 'proj', 'repo', '/src/f.ts'),
+    ).rejects.toBeInstanceOf(AzureDevOpsError);
   });
 });

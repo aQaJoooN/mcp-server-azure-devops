@@ -34,10 +34,20 @@ export async function getTaskLog(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Log ${logId} not found for build ${buildId}: ${error.message}`,
         );

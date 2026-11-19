@@ -7,12 +7,23 @@ import {
 import { getAgentPoolDetails } from './feature';
 
 function makeConn(defResult: unknown, poolResult?: unknown) {
-  const getMock = poolResult !== undefined
-    ? jest.fn()
-        .mockResolvedValueOnce({ statusCode: defResult ? 200 : 404, result: defResult })
-        .mockResolvedValueOnce({ statusCode: 200, result: poolResult })
-    : jest.fn().mockResolvedValue({ statusCode: defResult ? 200 : 404, result: defResult });
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest: { get: getMock } };
+  const getMock =
+    poolResult !== undefined
+      ? jest
+          .fn()
+          .mockResolvedValueOnce({
+            statusCode: defResult ? 200 : 404,
+            result: defResult,
+          })
+          .mockResolvedValueOnce({ statusCode: 200, result: poolResult })
+      : jest.fn().mockResolvedValue({
+          statusCode: defResult ? 200 : 404,
+          result: defResult,
+        });
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest: { get: getMock },
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -22,7 +33,13 @@ function makeConn(defResult: unknown, poolResult?: unknown) {
 describe('getAgentPoolDetails', () => {
   it('returns queue and pool details when queueId is present', async () => {
     const def = { id: 1, name: 'CI', queue: { id: 5, name: 'Default' } };
-    const pool = { id: 5, name: 'Default', size: 3, isHosted: false, poolType: 'automation' };
+    const pool = {
+      id: 5,
+      name: 'Default',
+      size: 3,
+      isHosted: false,
+      poolType: 'automation',
+    };
     const conn = makeConn(def, pool);
     const result = await getAgentPoolDetails(conn, 'proj', 1);
     expect(result.queue?.id).toBe(5);
@@ -39,7 +56,11 @@ describe('getAgentPoolDetails', () => {
   });
 
   it('handles definition with queuePool id', async () => {
-    const def = { id: 1, name: 'CI', queue: { pool: { id: 7 }, name: 'PoolQueue' } };
+    const def = {
+      id: 1,
+      name: 'CI',
+      queue: { pool: { id: 7 }, name: 'PoolQueue' },
+    };
     const pool = { id: 7, name: 'BuildPool' };
     const conn = makeConn(def, pool);
     const result = await getAgentPoolDetails(conn, 'proj', 1);
@@ -76,15 +97,21 @@ describe('getAgentPoolDetails', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getAgentPoolDetails(conn, 'proj', 1)).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getAgentPoolDetails(conn, 'proj', 1)).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 
   it('returns undefined pool when pool response result is null', async () => {
     const def = { id: 1, name: 'CI', queue: { id: 5, name: 'Default' } };
-    const getMock = jest.fn()
+    const getMock = jest
+      .fn()
       .mockResolvedValueOnce({ statusCode: 200, result: def })
       .mockResolvedValueOnce({ statusCode: 200, result: null });
-    const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest: { get: getMock } };
+    const buildApi = {
+      createRequestOptions: jest.fn().mockReturnValue({}),
+      rest: { get: getMock },
+    };
     const conn = {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',

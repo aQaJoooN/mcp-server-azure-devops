@@ -18,8 +18,16 @@ describe('getCommitDiff', () => {
   it('returns change list on success', async () => {
     const mockChanges = {
       changes: [
-        { item: { path: '/src/app.ts', objectId: 'oid1' }, originalPath: undefined, changeType: 'edit' },
-        { item: { path: '/src/utils.ts' }, originalPath: '/src/utils-old.ts', changeType: 'rename' },
+        {
+          item: { path: '/src/app.ts', objectId: 'oid1' },
+          originalPath: undefined,
+          changeType: 'edit',
+        },
+        {
+          item: { path: '/src/utils.ts' },
+          originalPath: '/src/utils-old.ts',
+          changeType: 'rename',
+        },
       ],
     };
     const conn = makeConn(mockChanges);
@@ -32,13 +40,15 @@ describe('getCommitDiff', () => {
 
   it('throws ResourceNotFoundError when changes is null', async () => {
     const conn = makeConn(null);
-    await expect(getCommitDiff(conn, 'proj', 'repo', 'abc')).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      getCommitDiff(conn, 'proj', 'repo', 'abc'),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('wraps unknown errors in AzureDevOpsError', async () => {
     const conn = makeConn(null, new Error('timeout'));
-    await expect(getCommitDiff(conn, 'proj', 'repo', 'abc')).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(
+      getCommitDiff(conn, 'proj', 'repo', 'abc'),
+    ).rejects.toBeInstanceOf(AzureDevOpsError);
   });
 });

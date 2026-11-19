@@ -10,7 +10,10 @@ function makeConn(projects: unknown) {
 
 describe('listProjects', () => {
   it('returns project list on success', async () => {
-    const mockProjects = [{ id: '1', name: 'Alpha' }, { id: '2', name: 'Beta' }];
+    const mockProjects = [
+      { id: '1', name: 'Alpha' },
+      { id: '2', name: 'Beta' },
+    ];
     const conn = makeConn(mockProjects);
     const result = await listProjects(conn);
     expect(result).toEqual(mockProjects);
@@ -26,7 +29,9 @@ describe('listProjects', () => {
   });
 
   it('wraps errors in a plain Error', async () => {
-    const coreApi = { getProjects: jest.fn().mockRejectedValue(new Error('server error')) };
+    const coreApi = {
+      getProjects: jest.fn().mockRejectedValue(new Error('server error')),
+    };
     const conn = {
       getCoreApi: jest.fn().mockResolvedValue(coreApi),
     } as unknown as WebApi;

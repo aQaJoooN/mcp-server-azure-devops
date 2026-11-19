@@ -7,7 +7,10 @@ import { getBuildChanges } from './feature';
 
 function makeConnection(statusCode: number, result: unknown) {
   const rest = { get: jest.fn().mockResolvedValue({ statusCode, result }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',

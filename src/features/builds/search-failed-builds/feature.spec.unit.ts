@@ -2,8 +2,13 @@ import { WebApi } from 'azure-devops-node-api';
 import { searchFailedBuilds } from './feature';
 
 function makeConnection(result: unknown) {
-  const rest = { get: jest.fn().mockResolvedValue({ statusCode: 200, result }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const rest = {
+    get: jest.fn().mockResolvedValue({ statusCode: 200, result }),
+  };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',

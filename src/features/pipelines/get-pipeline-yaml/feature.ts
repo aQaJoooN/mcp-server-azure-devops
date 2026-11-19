@@ -37,7 +37,10 @@ export async function getPipelineYaml(
     );
     defUrl.searchParams.set('api-version', apiVersion);
 
-    const requestOptions = buildApi.createRequestOptions('application/json', apiVersion);
+    const requestOptions = buildApi.createRequestOptions(
+      'application/json',
+      apiVersion,
+    );
     const defResponse = await buildApi.rest.get<Record<string, unknown> | null>(
       defUrl.toString(),
       requestOptions,
@@ -51,12 +54,15 @@ export async function getPipelineYaml(
 
     const definition = defResponse.result;
     const process = definition.process as Record<string, unknown> | undefined;
-    const repository = definition.repository as Record<string, unknown> | undefined;
+    const repository = definition.repository as
+      | Record<string, unknown>
+      | undefined;
 
     // Try to find the YAML path
     const yamlPath =
       (process?.yamlFilename as string | undefined) ??
-      (repository?.properties as Record<string, string> | undefined)?.yamlFilename;
+      (repository?.properties as Record<string, string> | undefined)
+        ?.yamlFilename;
 
     const repositoryId =
       (repository?.id as string | undefined) ??
@@ -66,7 +72,8 @@ export async function getPipelineYaml(
       return {
         definitionId,
         repositoryId,
-        error: 'No YAML file path found in pipeline definition (may be a classic pipeline)',
+        error:
+          'No YAML file path found in pipeline definition (may be a classic pipeline)',
       };
     }
 
@@ -108,10 +115,20 @@ export async function getPipelineYaml(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Pipeline definition ${definitionId} not found: ${error.message}`,
         );

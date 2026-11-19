@@ -35,7 +35,10 @@ export async function getVariableGroups(
     url.searchParams.set('$top', String(top));
     if (groupName) url.searchParams.set('groupName', groupName);
 
-    const requestOptions = buildApi.createRequestOptions('application/json', apiVersion);
+    const requestOptions = buildApi.createRequestOptions(
+      'application/json',
+      apiVersion,
+    );
     const response = await buildApi.rest.get<{
       count: number;
       value: VariableGroupEntry[];
@@ -51,7 +54,8 @@ export async function getVariableGroups(
     const groups = response.result.value ?? [];
     return groups.map((group) => {
       if (!group.variables) return group;
-      const sanitized: Record<string, { value?: string; isSecret?: boolean }> = {};
+      const sanitized: Record<string, { value?: string; isSecret?: boolean }> =
+        {};
       for (const [key, variable] of Object.entries(group.variables)) {
         if (variable.isSecret) {
           sanitized[key] = { isSecret: true, value: '<secret>' };
@@ -65,10 +69,20 @@ export async function getVariableGroups(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Variable groups not found in project ${projectId}: ${error.message}`,
         );

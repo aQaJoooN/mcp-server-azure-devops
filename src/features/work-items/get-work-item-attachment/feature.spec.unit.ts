@@ -9,8 +9,11 @@ const mockFs = fs as jest.Mocked<typeof fs>;
 
 function makePipeableStream(content: string) {
   const readable = new Readable({ read() {} });
-  const writableTarget = { 
-    on: jest.fn((event: string, cb: () => void) => { if (event === 'finish') cb(); return writableTarget; }),
+  const writableTarget = {
+    on: jest.fn((event: string, cb: () => void) => {
+      if (event === 'finish') cb();
+      return writableTarget;
+    }),
     end: jest.fn(),
   };
   // Simulate that the attachment stream has a 'pipe' method and fires 'error'/'end'
@@ -34,7 +37,10 @@ describe('getWorkItemAttachment', () => {
   it('throws when attachmentId is missing', async () => {
     const conn = makeConn(null);
     await expect(
-      getWorkItemAttachment(conn, { attachmentId: '', outputPath: '/tmp/out.txt' }),
+      getWorkItemAttachment(conn, {
+        attachmentId: '',
+        outputPath: '/tmp/out.txt',
+      }),
     ).rejects.toThrow('Attachment ID is required');
   });
 
@@ -48,7 +54,10 @@ describe('getWorkItemAttachment', () => {
   it('throws when no stream returned', async () => {
     const conn = makeConn(null);
     await expect(
-      getWorkItemAttachment(conn, { attachmentId: 'abc', outputPath: '/tmp/out.txt' }),
+      getWorkItemAttachment(conn, {
+        attachmentId: 'abc',
+        outputPath: '/tmp/out.txt',
+      }),
     ).rejects.toThrow('No content received');
   });
 });

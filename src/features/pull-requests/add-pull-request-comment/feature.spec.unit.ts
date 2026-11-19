@@ -32,24 +32,26 @@ describe('addPullRequestComment', () => {
   it('adds comment to existing thread', async () => {
     const gitApi = makeGitApi();
     const conn = makeConn(gitApi);
-    const result = await addPullRequestComment(
-      conn, 'proj', 'repo-1', 42,
-      { content: 'reply', threadId: 5 },
-    );
+    const result = await addPullRequestComment(conn, 'proj', 'repo-1', 42, {
+      content: 'reply',
+      threadId: 5,
+    });
     expect(result.comment?.content).toBe('my comment');
     expect(gitApi.createComment).toHaveBeenCalledWith(
       expect.objectContaining({ content: 'reply' }),
-      'repo-1', 42, 5, 'proj',
+      'repo-1',
+      42,
+      5,
+      'proj',
     );
   });
 
   it('creates new thread without file context', async () => {
     const gitApi = makeGitApi();
     const conn = makeConn(gitApi);
-    const result = await addPullRequestComment(
-      conn, 'proj', 'repo-1', 42,
-      { content: 'general comment' },
-    );
+    const result = await addPullRequestComment(conn, 'proj', 'repo-1', 42, {
+      content: 'general comment',
+    });
     expect(result.thread).toBeDefined();
     expect(gitApi.createThread).toHaveBeenCalled();
   });
@@ -57,10 +59,11 @@ describe('addPullRequestComment', () => {
   it('creates thread with file context and line number', async () => {
     const gitApi = makeGitApi();
     const conn = makeConn(gitApi);
-    await addPullRequestComment(
-      conn, 'proj', 'repo-1', 42,
-      { content: 'inline comment', filePath: '/src/app.ts', lineNumber: 2 },
-    );
+    await addPullRequestComment(conn, 'proj', 'repo-1', 42, {
+      content: 'inline comment',
+      filePath: '/src/app.ts',
+      lineNumber: 2,
+    });
     const threadArg = gitApi.createThread.mock.calls[0][0];
     expect(threadArg.threadContext?.filePath).toBe('/src/app.ts');
     expect(threadArg.threadContext?.rightFileStart?.line).toBe(2);
@@ -69,10 +72,10 @@ describe('addPullRequestComment', () => {
   it('creates thread with status set', async () => {
     const gitApi = makeGitApi();
     const conn = makeConn(gitApi);
-    await addPullRequestComment(
-      conn, 'proj', 'repo-1', 42,
-      { content: 'needs work', status: 'active' },
-    );
+    await addPullRequestComment(conn, 'proj', 'repo-1', 42, {
+      content: 'needs work',
+      status: 'active',
+    });
     const threadArg = gitApi.createThread.mock.calls[0][0];
     expect(threadArg.status).toBeDefined();
   });
@@ -80,10 +83,9 @@ describe('addPullRequestComment', () => {
   it('resolves repositoryId from PR when not provided', async () => {
     const gitApi = makeGitApi();
     const conn = makeConn(gitApi);
-    const result = await addPullRequestComment(
-      conn, 'proj', undefined, 42,
-      { content: 'auto resolve repo' },
-    );
+    const result = await addPullRequestComment(conn, 'proj', undefined, 42, {
+      content: 'auto resolve repo',
+    });
     expect(gitApi.getPullRequestById).toHaveBeenCalledWith(42, 'proj');
     expect(result.thread).toBeDefined();
   });
@@ -109,11 +111,22 @@ describe('addPullRequestComment', () => {
   });
 
   it('applies all thread statuses', async () => {
-    const statuses = ['active', 'fixed', 'wontFix', 'closed', 'pending', 'byDesign', 'unknown'];
+    const statuses = [
+      'active',
+      'fixed',
+      'wontFix',
+      'closed',
+      'pending',
+      'byDesign',
+      'unknown',
+    ];
     for (const status of statuses) {
       const gitApi = makeGitApi();
       const conn = makeConn(gitApi);
-      await addPullRequestComment(conn, 'proj', 'repo-1', 42, { content: 'x', status: status as never });
+      await addPullRequestComment(conn, 'proj', 'repo-1', 42, {
+        content: 'x',
+        status: status as never,
+      });
       const threadArg = gitApi.createThread.mock.calls[0][0];
       expect(threadArg.status).toBeDefined();
     }

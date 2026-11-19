@@ -246,11 +246,17 @@ export const handlePipelinesRequest: RequestHandler = async (
     }
     case 'get_pipeline_yaml': {
       const args = GetPipelineYamlSchema.parse(request.params.arguments);
-      const result = await getPipelineYaml(connection, args.projectId, args.definitionId);
+      const result = await getPipelineYaml(
+        connection,
+        args.projectId,
+        args.definitionId,
+      );
       if (result.content !== undefined) {
         return { content: [{ type: 'text', text: result.content }] };
       }
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_pipeline_template': {
       const args = GetPipelineTemplateSchema.parse(request.params.arguments);

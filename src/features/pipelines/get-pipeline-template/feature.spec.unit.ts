@@ -27,7 +27,13 @@ describe('getPipelineTemplate', () => {
   it('returns template content on success', async () => {
     const content = 'steps:\n  - script: echo hello\n';
     const conn = makeConn(makeStream(content));
-    const result = await getPipelineTemplate(conn, 'proj', 'my-repo', 'templates/job.yml', 'main');
+    const result = await getPipelineTemplate(
+      conn,
+      'proj',
+      'my-repo',
+      'templates/job.yml',
+      'main',
+    );
     expect(result.content).toBe(content);
     expect(result.repositoryId).toBe('my-repo');
     expect(result.templatePath).toBe('templates/job.yml');
@@ -35,7 +41,9 @@ describe('getPipelineTemplate', () => {
   });
 
   it('uses default branch "main" when not specified', async () => {
-    const getItemContent = jest.fn().mockResolvedValue(makeStream('# template'));
+    const getItemContent = jest
+      .fn()
+      .mockResolvedValue(makeStream('# template'));
     const conn = {
       getGitApi: jest.fn().mockResolvedValue({ getItemContent }),
     } as unknown as WebApi;

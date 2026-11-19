@@ -8,7 +8,10 @@ import { listLibraries } from './feature';
 
 function makeConn(statusCode: number, result: unknown) {
   const rest = { get: jest.fn().mockResolvedValue({ statusCode, result }) };
-  const taskAgentApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const taskAgentApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getTaskAgentApi: jest.fn().mockResolvedValue(taskAgentApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -25,13 +28,22 @@ describe('listLibraries', () => {
 
   it('applies optional groupName and top filters', async () => {
     const mockData = { count: 0, value: [] };
-    const rest = { get: jest.fn().mockResolvedValue({ statusCode: 200, result: mockData }) };
-    const taskAgentApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+    const rest = {
+      get: jest.fn().mockResolvedValue({ statusCode: 200, result: mockData }),
+    };
+    const taskAgentApi = {
+      createRequestOptions: jest.fn().mockReturnValue({}),
+      rest,
+    };
     const conn = {
       getTaskAgentApi: jest.fn().mockResolvedValue(taskAgentApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await listLibraries(conn, { projectId: 'proj', groupName: 'SharedVars', top: 5 });
+    await listLibraries(conn, {
+      projectId: 'proj',
+      groupName: 'SharedVars',
+      top: 5,
+    });
     const calledUrl: string = rest.get.mock.calls[0][0];
     expect(calledUrl).toContain('groupName=SharedVars');
     expect(calledUrl).toContain('%24top=5');
@@ -39,9 +51,9 @@ describe('listLibraries', () => {
 
   it('throws ResourceNotFoundError on 404', async () => {
     const conn = makeConn(404, null);
-    await expect(listLibraries(conn, { projectId: 'proj' })).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      listLibraries(conn, { projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('throws AuthenticationError on 401 message', async () => {
@@ -53,9 +65,9 @@ describe('listLibraries', () => {
       getTaskAgentApi: jest.fn().mockResolvedValue(taskAgentApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(listLibraries(conn, { projectId: 'proj' })).rejects.toBeInstanceOf(
-      AzureDevOpsAuthenticationError,
-    );
+    await expect(
+      listLibraries(conn, { projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsAuthenticationError);
   });
 
   it('throws ResourceNotFoundError on "not found" message', async () => {
@@ -67,9 +79,9 @@ describe('listLibraries', () => {
       getTaskAgentApi: jest.fn().mockResolvedValue(taskAgentApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(listLibraries(conn, { projectId: 'proj' })).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      listLibraries(conn, { projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('wraps unknown errors in AzureDevOpsError', async () => {
@@ -81,8 +93,8 @@ describe('listLibraries', () => {
       getTaskAgentApi: jest.fn().mockResolvedValue(taskAgentApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(listLibraries(conn, { projectId: 'proj' })).rejects.toBeInstanceOf(
-      AzureDevOpsError,
-    );
+    await expect(
+      listLibraries(conn, { projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsError);
   });
 });

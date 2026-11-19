@@ -15,5 +15,7 @@ export const GetFileHistorySchema = z.object({
   branchName: z
     .string()
     .optional()
-    .describe('Branch name to search commits on (defaults to repository default branch)'),
+    .describe(
+      'Branch name to search commits on (defaults to repository default branch)',
+    ),
 });

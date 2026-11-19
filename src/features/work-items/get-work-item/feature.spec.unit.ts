@@ -5,7 +5,9 @@ import { getWorkItem } from './feature';
 function makeWitApi(workItem: unknown, typeFields: unknown = []) {
   return {
     getWorkItem: jest.fn().mockResolvedValue(workItem),
-    getWorkItemTypeFieldsWithReferences: jest.fn().mockResolvedValue(typeFields),
+    getWorkItemTypeFieldsWithReferences: jest
+      .fn()
+      .mockResolvedValue(typeFields),
   };
 }
 
@@ -18,7 +20,9 @@ function makeConn(witApi: unknown) {
 describe('getWorkItem', () => {
   it('returns null work item as ResourceNotFoundError', async () => {
     const conn = makeConn(makeWitApi(null));
-    await expect(getWorkItem(conn, 42)).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
+    await expect(getWorkItem(conn, 42)).rejects.toBeInstanceOf(
+      AzureDevOpsResourceNotFoundError,
+    );
   });
 
   it('returns work item when no project/type info available', async () => {
@@ -56,7 +60,12 @@ describe('getWorkItem', () => {
     const witApi = makeWitApi(workItem);
     const conn = makeConn(witApi);
     await getWorkItem(conn, 5, 'relations');
-    expect(witApi.getWorkItem).toHaveBeenCalledWith(5, undefined, undefined, expect.any(Number));
+    expect(witApi.getWorkItem).toHaveBeenCalledWith(
+      5,
+      undefined,
+      undefined,
+      expect.any(Number),
+    );
   });
 
   it('wraps unknown errors', async () => {
@@ -64,7 +73,9 @@ describe('getWorkItem', () => {
       getWorkItem: jest.fn().mockRejectedValue(new Error('connection reset')),
     };
     const conn = makeConn(witApi);
-    await expect(getWorkItem(conn, 99)).rejects.toThrow('Failed to get work item');
+    await expect(getWorkItem(conn, 99)).rejects.toThrow(
+      'Failed to get work item',
+    );
   });
 
   it('uses cached type fields on second call', async () => {

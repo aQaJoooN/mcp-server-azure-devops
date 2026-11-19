@@ -110,9 +110,9 @@ describe('updateWorkItem', () => {
   it('throws ResourceNotFoundError when updateWorkItem returns null', async () => {
     const witApi = makeWitApi(null);
     const conn = makeConn(witApi);
-    await expect(updateWorkItem(conn, 1, { title: 'x' })).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      updateWorkItem(conn, 1, { title: 'x' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('throws ResourceNotFoundError when getWorkItem returns null for tags', async () => {
@@ -121,9 +121,9 @@ describe('updateWorkItem', () => {
       updateWorkItem: jest.fn(),
     };
     const conn = makeConn(witApi);
-    await expect(updateWorkItem(conn, 1, { tags: ['x'] })).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      updateWorkItem(conn, 1, { tags: ['x'] }),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('wraps unknown errors', async () => {

@@ -33,7 +33,10 @@ export async function getAgentPoolDetails(
       `${baseUrl}/`,
     );
     defUrl.searchParams.set('api-version', apiVersion);
-    const requestOptions = buildApi.createRequestOptions('application/json', apiVersion);
+    const requestOptions = buildApi.createRequestOptions(
+      'application/json',
+      apiVersion,
+    );
     const defResponse = await buildApi.rest.get<Record<string, unknown> | null>(
       defUrl.toString(),
       requestOptions,
@@ -45,7 +48,9 @@ export async function getAgentPoolDetails(
       );
     }
 
-    const queue = defResponse.result.queue as Record<string, unknown> | undefined;
+    const queue = defResponse.result.queue as
+      | Record<string, unknown>
+      | undefined;
     const queuePool = queue?.pool as Record<string, unknown> | undefined;
     const queueId = (queue?.id ?? queuePool?.id) as number | undefined;
 
@@ -65,10 +70,10 @@ export async function getAgentPoolDetails(
       `${baseUrl}/`,
     );
     poolUrl.searchParams.set('api-version', apiVersion);
-    const poolResponse = await buildApi.rest.get<Record<string, unknown> | null>(
-      poolUrl.toString(),
-      requestOptions,
-    );
+    const poolResponse = await buildApi.rest.get<Record<
+      string,
+      unknown
+    > | null>(poolUrl.toString(), requestOptions);
 
     const pool = poolResponse.result;
 
@@ -92,10 +97,20 @@ export async function getAgentPoolDetails(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Pipeline definition ${definitionId} not found: ${error.message}`,
         );

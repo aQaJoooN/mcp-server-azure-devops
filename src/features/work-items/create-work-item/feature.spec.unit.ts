@@ -20,7 +20,9 @@ describe('createWorkItem', () => {
   it('creates work item with required title', async () => {
     const mockWI = { id: 1, fields: { 'System.Title': 'My Task' } };
     const conn = makeConn(mockWI);
-    const result = await createWorkItem(conn, 'proj', 'Task', { title: 'My Task' });
+    const result = await createWorkItem(conn, 'proj', 'Task', {
+      title: 'My Task',
+    });
     expect(result).toEqual(mockWI);
   });
 
@@ -51,7 +53,8 @@ describe('createWorkItem', () => {
       additionalFields: { 'Custom.Field': 'value' },
     });
 
-    const patchDoc: { path: string; value: unknown }[] = witApi.createWorkItem.mock.calls[0][1];
+    const patchDoc: { path: string; value: unknown }[] =
+      witApi.createWorkItem.mock.calls[0][1];
     const paths = patchDoc.map((p) => p.path);
 
     expect(paths).toContain('/fields/System.Title');
@@ -69,13 +72,15 @@ describe('createWorkItem', () => {
   });
 
   it('wraps API errors', async () => {
-    const witApi = { createWorkItem: jest.fn().mockRejectedValue(new Error('server error')) };
+    const witApi = {
+      createWorkItem: jest.fn().mockRejectedValue(new Error('server error')),
+    };
     const conn = {
       getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(createWorkItem(conn, 'proj', 'Task', { title: 'x' })).rejects.toThrow(
-      'Failed to create work item',
-    );
+    await expect(
+      createWorkItem(conn, 'proj', 'Task', { title: 'x' }),
+    ).rejects.toThrow('Failed to create work item');
   });
 });

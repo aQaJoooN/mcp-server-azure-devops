@@ -26,7 +26,9 @@ afterEach(() => {
 
 describe('searchWorkItems', () => {
   it('returns search results on success', async () => {
-    const mockResponse = { data: { count: 1, results: [{ id: { workItemId: 42 } }] } };
+    const mockResponse = {
+      data: { count: 1, results: [{ id: { workItemId: 42 } }] },
+    };
     mockAxios.post.mockResolvedValue(mockResponse);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (mockAxios as any).isAxiosError = jest.fn().mockReturnValue(false);
@@ -39,7 +41,11 @@ describe('searchWorkItems', () => {
   });
 
   it('throws AzureDevOpsResourceNotFoundError on 404', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 404, data: { message: 'missing' } }, message: 'missing' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 404, data: { message: 'missing' } },
+      message: 'missing',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 
@@ -49,7 +55,11 @@ describe('searchWorkItems', () => {
   });
 
   it('throws AzureDevOpsValidationError on 400', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 400, data: { message: 'bad' } }, message: 'bad' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 400, data: { message: 'bad' } },
+      message: 'bad',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 
@@ -59,7 +69,11 @@ describe('searchWorkItems', () => {
   });
 
   it('throws AzureDevOpsPermissionError on 403', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 403, data: { message: 'denied' } }, message: 'denied' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 403, data: { message: 'denied' } },
+      message: 'denied',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 
@@ -69,7 +83,11 @@ describe('searchWorkItems', () => {
   });
 
   it('throws generic AzureDevOpsError on 500', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 500, data: { message: 'err' } }, message: 'err' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 500, data: { message: 'err' } },
+      message: 'err',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 

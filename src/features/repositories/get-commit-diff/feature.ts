@@ -22,7 +22,11 @@ export async function getCommitDiff(
 ): Promise<CommitDiffResult> {
   try {
     const gitApi = await connection.getGitApi();
-    const commitChanges = await gitApi.getChanges(commitId, repositoryId, projectId);
+    const commitChanges = await gitApi.getChanges(
+      commitId,
+      repositoryId,
+      projectId,
+    );
 
     if (!commitChanges) {
       throw new AzureDevOpsResourceNotFoundError(
@@ -41,10 +45,20 @@ export async function getCommitDiff(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Commit ${commitId} not found: ${error.message}`,
         );

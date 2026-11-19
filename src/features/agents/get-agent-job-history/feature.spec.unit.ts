@@ -8,7 +8,10 @@ import { getAgentJobHistory } from './feature';
 
 function makeConn(statusCode: number, result: unknown) {
   const rest = { get: jest.fn().mockResolvedValue({ statusCode, result }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -30,8 +33,16 @@ describe('getAgentJobHistory', () => {
   });
 
   it('uses default top of 25', async () => {
-    const rest = { get: jest.fn().mockResolvedValue({ statusCode: 200, result: { count: 0, value: [] } }) };
-    const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+    const rest = {
+      get: jest.fn().mockResolvedValue({
+        statusCode: 200,
+        result: { count: 0, value: [] },
+      }),
+    };
+    const buildApi = {
+      createRequestOptions: jest.fn().mockReturnValue({}),
+      rest,
+    };
     const conn = {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
@@ -70,6 +81,8 @@ describe('getAgentJobHistory', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getAgentJobHistory(conn, 1, 5)).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getAgentJobHistory(conn, 1, 5)).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 });

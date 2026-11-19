@@ -66,8 +66,14 @@ export const handleBuildsRequest: RequestHandler = async (
   switch (request.params.name) {
     case 'get_build_details': {
       const args = GetBuildDetailsSchema.parse(request.params.arguments);
-      const result = await getBuildDetails(connection, args.projectId, args.buildId);
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      const result = await getBuildDetails(
+        connection,
+        args.projectId,
+        args.buildId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_build_timeline': {
       const args = GetBuildTimelineSchema.parse(request.params.arguments);
@@ -77,12 +83,20 @@ export const handleBuildsRequest: RequestHandler = async (
         args.buildId,
         args.timelineId,
       );
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_failed_tasks': {
       const args = GetFailedTasksSchema.parse(request.params.arguments);
-      const result = await getFailedTasks(connection, args.projectId, args.buildId);
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      const result = await getFailedTasks(
+        connection,
+        args.projectId,
+        args.buildId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_task_log': {
       const args = GetTaskLogSchema.parse(request.params.arguments);
@@ -98,8 +112,14 @@ export const handleBuildsRequest: RequestHandler = async (
     }
     case 'get_build_logs': {
       const args = GetBuildLogsSchema.parse(request.params.arguments);
-      const result = await getBuildLogs(connection, args.projectId, args.buildId);
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      const result = await getBuildLogs(
+        connection,
+        args.projectId,
+        args.buildId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'compare_builds': {
       const args = CompareBuildsSchema.parse(request.params.arguments);
@@ -109,7 +129,9 @@ export const handleBuildsRequest: RequestHandler = async (
         args.buildId1,
         args.buildId2,
       );
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_build_changes': {
       const args = GetBuildChangesSchema.parse(request.params.arguments);
@@ -119,7 +141,9 @@ export const handleBuildsRequest: RequestHandler = async (
         args.buildId,
         args.top,
       );
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'search_failed_builds': {
       const args = SearchFailedBuildsSchema.parse(request.params.arguments);
@@ -132,7 +156,9 @@ export const handleBuildsRequest: RequestHandler = async (
         args.minTime,
         args.maxTime,
       );
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_last_successful_build': {
       const args = GetLastSuccessfulBuildSchema.parse(request.params.arguments);
@@ -146,13 +172,17 @@ export const handleBuildsRequest: RequestHandler = async (
         content: [
           {
             type: 'text',
-            text: result ? JSON.stringify(result, null, 2) : 'No successful build found',
+            text: result
+              ? JSON.stringify(result, null, 2)
+              : 'No successful build found',
           },
         ],
       };
     }
     case 'compare_failed_successful_builds': {
-      const args = CompareFailedSuccessfulBuildsSchema.parse(request.params.arguments);
+      const args = CompareFailedSuccessfulBuildsSchema.parse(
+        request.params.arguments,
+      );
       const result = await compareFailedSuccessfulBuilds(
         connection,
         args.projectId,
@@ -160,7 +190,9 @@ export const handleBuildsRequest: RequestHandler = async (
         args.definitionId,
         args.branchName,
       );
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     default:
       throw new Error(`Unknown builds tool: ${request.params.name}`);

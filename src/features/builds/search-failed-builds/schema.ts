@@ -19,7 +19,9 @@ export const SearchFailedBuildsSchema = z.object({
     .max(200)
     .optional()
     .default(25)
-    .describe('Maximum number of failed builds to return (default 25, max 200)'),
+    .describe(
+      'Maximum number of failed builds to return (default 25, max 200)',
+    ),
   minTime: z
     .string()
     .optional()

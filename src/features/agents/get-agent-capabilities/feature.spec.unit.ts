@@ -21,7 +21,10 @@ describe('getAgentCapabilities', () => {
     const result = await getAgentCapabilities({} as WebApi, 1, 1);
     expect(result.agentId).toBe(1);
     expect(result.agentName).toBe('Agent1');
-    expect(result.systemCapabilities).toEqual({ JAVA_HOME: '/usr', NODE_VERSION: '20' });
+    expect(result.systemCapabilities).toEqual({
+      JAVA_HOME: '/usr',
+      NODE_VERSION: '20',
+    });
     expect(result.userCapabilities).toEqual({ build_env: 'production' });
   });
 
@@ -39,8 +42,8 @@ describe('getAgentCapabilities', () => {
     (getAgentDetails as jest.Mock).mockRejectedValue(
       new AzureDevOpsResourceNotFoundError('agent not found'),
     );
-    await expect(getAgentCapabilities({} as WebApi, 1, 99)).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      getAgentCapabilities({} as WebApi, 1, 99),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 });

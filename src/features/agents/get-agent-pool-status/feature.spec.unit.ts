@@ -7,11 +7,15 @@ import { getAgentPoolStatus } from './feature';
 
 function makeConn(poolResult: unknown, agentsResult: unknown) {
   const rest = {
-    get: jest.fn()
+    get: jest
+      .fn()
       .mockResolvedValueOnce({ statusCode: 200, result: poolResult })
       .mockResolvedValueOnce({ statusCode: 200, result: agentsResult }),
   };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -45,7 +49,10 @@ describe('getAgentPoolStatus', () => {
     const rest = {
       get: jest.fn().mockResolvedValue({ statusCode: 404, result: null }),
     };
-    const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+    const buildApi = {
+      createRequestOptions: jest.fn().mockReturnValue({}),
+      rest,
+    };
     const conn = {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
@@ -64,6 +71,8 @@ describe('getAgentPoolStatus', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getAgentPoolStatus(conn, 1)).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getAgentPoolStatus(conn, 1)).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 });

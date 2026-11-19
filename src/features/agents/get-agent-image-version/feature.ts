@@ -15,7 +15,14 @@ export interface AgentImageVersionResult {
   rawCapabilities: Record<string, string>;
 }
 
-const IMAGE_KEYWORDS = ['image', 'version', 'docker', 'container', 'k8s', 'kubernetes'];
+const IMAGE_KEYWORDS = [
+  'image',
+  'version',
+  'docker',
+  'container',
+  'k8s',
+  'kubernetes',
+];
 
 function matchesImageKeyword(key: string): boolean {
   const lower = key.toLowerCase();
@@ -53,8 +60,19 @@ export async function getAgentImageVersion(
       return null;
     };
 
-    const containerImage = findValue(['containerimage', 'dockerimage', 'k8simage', 'kubernetesimage', 'docker_image', 'container_image']);
-    const imageVersion = findValue(['imageversion', 'image_version', 'agentimageversion']);
+    const containerImage = findValue([
+      'containerimage',
+      'dockerimage',
+      'k8simage',
+      'kubernetesimage',
+      'docker_image',
+      'container_image',
+    ]);
+    const imageVersion = findValue([
+      'imageversion',
+      'image_version',
+      'agentimageversion',
+    ]);
 
     return {
       agentId: agent.id,
@@ -68,10 +86,20 @@ export async function getAgentImageVersion(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Agent ${agentId} not found in pool ${poolId}: ${error.message}`,
         );

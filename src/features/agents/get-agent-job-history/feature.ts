@@ -24,7 +24,10 @@ export async function getAgentJobHistory(
     url.searchParams.set('agentId', String(agentId));
     url.searchParams.set('completedRequestCount', String(top));
 
-    const requestOptions = buildApi.createRequestOptions('application/json', apiVersion);
+    const requestOptions = buildApi.createRequestOptions(
+      'application/json',
+      apiVersion,
+    );
     const response = await buildApi.rest.get<{
       count: number;
       value: AgentJobRequest[];
@@ -41,10 +44,20 @@ export async function getAgentJobHistory(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Agent ${agentId} not found in pool ${poolId}: ${error.message}`,
         );

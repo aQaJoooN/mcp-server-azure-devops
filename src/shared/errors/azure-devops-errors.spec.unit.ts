@@ -60,8 +60,12 @@ describe('Error classes', () => {
 describe('isAzureDevOpsError', () => {
   it('returns true for AzureDevOpsError instances', () => {
     expect(isAzureDevOpsError(new AzureDevOpsError('x'))).toBe(true);
-    expect(isAzureDevOpsError(new AzureDevOpsAuthenticationError('x'))).toBe(true);
-    expect(isAzureDevOpsError(new AzureDevOpsResourceNotFoundError('x'))).toBe(true);
+    expect(isAzureDevOpsError(new AzureDevOpsAuthenticationError('x'))).toBe(
+      true,
+    );
+    expect(isAzureDevOpsError(new AzureDevOpsResourceNotFoundError('x'))).toBe(
+      true,
+    );
   });
 
   it('returns false for plain Error', () => {
@@ -77,12 +81,17 @@ describe('isAzureDevOpsError', () => {
 
 describe('formatAzureDevOpsError', () => {
   it('formats basic AzureDevOpsError', () => {
-    const result = formatAzureDevOpsError(new AzureDevOpsError('something failed'));
+    const result = formatAzureDevOpsError(
+      new AzureDevOpsError('something failed'),
+    );
     expect(result).toContain('something failed');
   });
 
   it('formats AzureDevOpsValidationError with response', () => {
-    const e = new AzureDevOpsValidationError('bad', { message: 'details', statusCode: 400 });
+    const e = new AzureDevOpsValidationError('bad', {
+      message: 'details',
+      statusCode: 400,
+    });
     const result = formatAzureDevOpsError(e);
     expect(result).toContain('bad');
     expect(result).toContain('details');

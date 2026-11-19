@@ -17,7 +17,10 @@ jest.mock('./get-agent-environment-summary/feature');
 
 const mockConnection = {} as WebApi;
 
-function makeRequest(name: string, args: Record<string, unknown> = {}): CallToolRequest {
+function makeRequest(
+  name: string,
+  args: Record<string, unknown> = {},
+): CallToolRequest {
   return {
     params: { name, arguments: args },
     method: 'tools/call',

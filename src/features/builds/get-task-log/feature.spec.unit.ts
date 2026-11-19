@@ -31,12 +31,20 @@ describe('getTaskLog', () => {
   });
 
   it('passes startLine and endLine to API', async () => {
-    const buildApi = { getBuildLogLines: jest.fn().mockResolvedValue(['line']) };
+    const buildApi = {
+      getBuildLogLines: jest.fn().mockResolvedValue(['line']),
+    };
     const conn = {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
     } as unknown as WebApi;
     await getTaskLog(conn, 'proj', 10, 2, 5, 15);
-    expect(buildApi.getBuildLogLines).toHaveBeenCalledWith('proj', 10, 2, 5, 15);
+    expect(buildApi.getBuildLogLines).toHaveBeenCalledWith(
+      'proj',
+      10,
+      2,
+      5,
+      15,
+    );
   });
 
   it('throws AuthenticationError on 401 message', async () => {
@@ -55,6 +63,8 @@ describe('getTaskLog', () => {
 
   it('wraps unknown errors', async () => {
     const conn = makeConn(null, new Error('timeout'));
-    await expect(getTaskLog(conn, 'proj', 10, 1)).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getTaskLog(conn, 'proj', 10, 1)).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 });

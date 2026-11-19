@@ -29,7 +29,10 @@ afterEach(() => {
 describe('searchWiki', () => {
   it('returns search results on success', async () => {
     const mockResponse = {
-      data: { count: 1, results: [{ fileName: 'page.md', path: '/docs/page' }] },
+      data: {
+        count: 1,
+        results: [{ fileName: 'page.md', path: '/docs/page' }],
+      },
     };
     mockAxios.post.mockResolvedValue(mockResponse);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +65,11 @@ describe('searchWiki', () => {
   });
 
   it('throws AzureDevOpsResourceNotFoundError on axios 404', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 404, data: { message: 'not found' } }, message: 'not found' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 404, data: { message: 'not found' } },
+      message: 'not found',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 
@@ -72,7 +79,11 @@ describe('searchWiki', () => {
   });
 
   it('throws AzureDevOpsValidationError on axios 400', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 400, data: { message: 'bad' } }, message: 'bad' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 400, data: { message: 'bad' } },
+      message: 'bad',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 
@@ -82,7 +93,11 @@ describe('searchWiki', () => {
   });
 
   it('throws AzureDevOpsPermissionError on axios 401', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 401, data: { message: 'denied' } }, message: 'denied' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 401, data: { message: 'denied' } },
+      message: 'denied',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 
@@ -92,7 +107,11 @@ describe('searchWiki', () => {
   });
 
   it('throws generic AzureDevOpsError on other axios error', async () => {
-    const axiosErr = { isAxiosError: true, response: { status: 500, data: { message: 'server' } }, message: 'server' };
+    const axiosErr = {
+      isAxiosError: true,
+      response: { status: 500, data: { message: 'server' } },
+      message: 'server',
+    };
     mockAxios.post.mockRejectedValue(axiosErr);
     mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 

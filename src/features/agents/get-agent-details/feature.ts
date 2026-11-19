@@ -23,7 +23,10 @@ export async function getAgentDetails(
     url.searchParams.set('api-version', apiVersion);
     url.searchParams.set('includeCapabilities', String(includeCapabilities));
 
-    const requestOptions = buildApi.createRequestOptions('application/json', apiVersion);
+    const requestOptions = buildApi.createRequestOptions(
+      'application/json',
+      apiVersion,
+    );
     const response = await buildApi.rest.get<AgentInfo | null>(
       url.toString(),
       requestOptions,
@@ -40,10 +43,20 @@ export async function getAgentDetails(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Agent ${agentId} not found in pool ${poolId}: ${error.message}`,
         );

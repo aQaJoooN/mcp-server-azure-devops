@@ -14,11 +14,20 @@ function makeStream(content: string) {
 }
 
 function makeConn(defResult: unknown, yamlContent?: string) {
-  const rest = { get: jest.fn().mockResolvedValue({ statusCode: defResult ? 200 : 404, result: defResult }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
-  const getItemContent = yamlContent !== undefined
-    ? jest.fn().mockResolvedValue(makeStream(yamlContent))
-    : jest.fn().mockRejectedValue(new Error('file not found'));
+  const rest = {
+    get: jest.fn().mockResolvedValue({
+      statusCode: defResult ? 200 : 404,
+      result: defResult,
+    }),
+  };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
+  const getItemContent =
+    yamlContent !== undefined
+      ? jest.fn().mockResolvedValue(makeStream(yamlContent))
+      : jest.fn().mockRejectedValue(new Error('file not found'));
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     getGitApi: jest.fn().mockResolvedValue({ getItemContent }),
@@ -34,7 +43,10 @@ describe('getPipelineYaml', () => {
       process: { yamlFilename: 'azure-pipelines.yml' },
       repository: { id: 'repo-1' },
     };
-    const conn = makeConn(def, 'trigger:\n  branches:\n    include:\n      - main\n');
+    const conn = makeConn(
+      def,
+      'trigger:\n  branches:\n    include:\n      - main\n',
+    );
     const result = await getPipelineYaml(conn, 'proj', 1);
     expect(result.yamlPath).toBe('azure-pipelines.yml');
     expect(result.repositoryId).toBe('repo-1');

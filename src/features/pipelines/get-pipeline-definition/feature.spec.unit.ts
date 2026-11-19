@@ -8,7 +8,10 @@ import { getPipelineDefinition } from './feature';
 
 function makeConn(statusCode: number, result: unknown) {
   const rest = { get: jest.fn().mockResolvedValue({ statusCode, result }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -24,8 +27,13 @@ describe('getPipelineDefinition', () => {
   });
 
   it('appends revision to URL when provided', async () => {
-    const rest = { get: jest.fn().mockResolvedValue({ statusCode: 200, result: { id: 1 } }) };
-    const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+    const rest = {
+      get: jest.fn().mockResolvedValue({ statusCode: 200, result: { id: 1 } }),
+    };
+    const buildApi = {
+      createRequestOptions: jest.fn().mockReturnValue({}),
+      rest,
+    };
     const conn = {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
@@ -36,9 +44,9 @@ describe('getPipelineDefinition', () => {
 
   it('throws ResourceNotFoundError on 404', async () => {
     const conn = makeConn(404, null);
-    await expect(getPipelineDefinition(conn, 'proj', 999)).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      getPipelineDefinition(conn, 'proj', 999),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('throws AuthenticationError on 401 message', async () => {
@@ -64,6 +72,8 @@ describe('getPipelineDefinition', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getPipelineDefinition(conn, 'proj', 1)).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getPipelineDefinition(conn, 'proj', 1)).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 });

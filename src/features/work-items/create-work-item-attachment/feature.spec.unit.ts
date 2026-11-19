@@ -49,7 +49,12 @@ describe('createWorkItemAttachment', () => {
     mockFs.existsSync.mockReturnValue(true);
     mockFs.readFileSync.mockReturnValue(Buffer.from('file content') as never);
     const attachmentResult = { url: 'https://ado/attachments/abc-123' };
-    const updatedWorkItem = { id: 5, relations: [{ rel: 'AttachedFile', url: 'https://ado/attachments/abc-123' }] };
+    const updatedWorkItem = {
+      id: 5,
+      relations: [
+        { rel: 'AttachedFile', url: 'https://ado/attachments/abc-123' },
+      ],
+    };
     const witApi = makeWitApi(attachmentResult, updatedWorkItem);
     const conn = makeConn(witApi);
 

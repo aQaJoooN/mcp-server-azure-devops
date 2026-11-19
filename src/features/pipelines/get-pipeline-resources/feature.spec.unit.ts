@@ -7,7 +7,10 @@ import { getPipelineResources } from './feature';
 
 function makeConn(statusCode: number, result: unknown) {
   const rest = { get: jest.fn().mockResolvedValue({ statusCode, result }) };
-  const buildApi = { createRequestOptions: jest.fn().mockReturnValue({}), rest };
+  const buildApi = {
+    createRequestOptions: jest.fn().mockReturnValue({}),
+    rest,
+  };
   return {
     getBuildApi: jest.fn().mockResolvedValue(buildApi),
     serverUrl: 'https://ado/tfs/Col',
@@ -19,7 +22,13 @@ describe('getPipelineResources', () => {
     const def = {
       id: 5,
       name: 'CI Pipeline',
-      repository: { id: 'repo-1', name: 'MyRepo', type: 'TfsGit', defaultBranch: 'main', url: 'https://ado/repo' },
+      repository: {
+        id: 'repo-1',
+        name: 'MyRepo',
+        type: 'TfsGit',
+        defaultBranch: 'main',
+        url: 'https://ado/repo',
+      },
       process: {
         resources: {
           repositories: [{ alias: 'templates', type: 'git' }],
@@ -48,9 +57,9 @@ describe('getPipelineResources', () => {
 
   it('throws ResourceNotFoundError on 404', async () => {
     const conn = makeConn(404, null);
-    await expect(getPipelineResources(conn, 'proj', 999)).rejects.toBeInstanceOf(
-      AzureDevOpsResourceNotFoundError,
-    );
+    await expect(
+      getPipelineResources(conn, 'proj', 999),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
   it('wraps unknown errors in AzureDevOpsError', async () => {
@@ -62,6 +71,8 @@ describe('getPipelineResources', () => {
       getBuildApi: jest.fn().mockResolvedValue(buildApi),
       serverUrl: 'https://ado/tfs/Col',
     } as unknown as WebApi;
-    await expect(getPipelineResources(conn, 'proj', 1)).rejects.toBeInstanceOf(AzureDevOpsError);
+    await expect(getPipelineResources(conn, 'proj', 1)).rejects.toBeInstanceOf(
+      AzureDevOpsError,
+    );
   });
 });

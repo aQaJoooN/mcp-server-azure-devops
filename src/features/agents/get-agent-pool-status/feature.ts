@@ -40,10 +40,16 @@ export async function getAgentPoolStatus(
     agentsUrl.searchParams.set('api-version', apiVersion);
     agentsUrl.searchParams.set('includeCapabilities', 'false');
 
-    const requestOptions = buildApi.createRequestOptions('application/json', apiVersion);
+    const requestOptions = buildApi.createRequestOptions(
+      'application/json',
+      apiVersion,
+    );
 
     const [poolResponse, agentsResponse] = await Promise.all([
-      buildApi.rest.get<AgentPoolInfo | null>(poolUrl.toString(), requestOptions),
+      buildApi.rest.get<AgentPoolInfo | null>(
+        poolUrl.toString(),
+        requestOptions,
+      ),
       buildApi.rest.get<{ count: number; value: AgentInfo[] } | null>(
         agentsUrl.toString(),
         requestOptions,
@@ -60,7 +66,8 @@ export async function getAgentPoolStatus(
     const summary = {
       total: agents.length,
       online: agents.filter((a) => a.status?.toLowerCase() === 'online').length,
-      offline: agents.filter((a) => a.status?.toLowerCase() === 'offline').length,
+      offline: agents.filter((a) => a.status?.toLowerCase() === 'offline')
+        .length,
       enabled: agents.filter((a) => a.enabled !== false).length,
       disabled: agents.filter((a) => a.enabled === false).length,
     };
@@ -80,10 +87,20 @@ export async function getAgentPoolStatus(
     if (error instanceof AzureDevOpsError) throw error;
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('authentication') || msg.includes('unauthorized') || msg.includes('401')) {
-        throw new AzureDevOpsAuthenticationError(`Failed to authenticate: ${error.message}`);
+      if (
+        msg.includes('authentication') ||
+        msg.includes('unauthorized') ||
+        msg.includes('401')
+      ) {
+        throw new AzureDevOpsAuthenticationError(
+          `Failed to authenticate: ${error.message}`,
+        );
       }
-      if (msg.includes('not found') || msg.includes('does not exist') || msg.includes('404')) {
+      if (
+        msg.includes('not found') ||
+        msg.includes('does not exist') ||
+        msg.includes('404')
+      ) {
         throw new AzureDevOpsResourceNotFoundError(
           `Pool ${poolId} not found: ${error.message}`,
         );

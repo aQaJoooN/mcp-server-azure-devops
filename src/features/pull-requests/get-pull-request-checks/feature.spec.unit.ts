@@ -2,7 +2,11 @@ import { WebApi } from 'azure-devops-node-api';
 import { AzureDevOpsResourceNotFoundError } from '../../../shared/errors';
 import { getPullRequestChecks } from './feature';
 
-function makeConn(statusRecords: unknown[], evaluations: unknown[], projectId = 'proj-guid-1234') {
+function makeConn(
+  statusRecords: unknown[],
+  evaluations: unknown[],
+  projectId = 'proj-guid-1234',
+) {
   const gitApi = {
     getPullRequestStatuses: jest.fn().mockResolvedValue(statusRecords),
   };
@@ -79,7 +83,9 @@ describe('getPullRequestChecks', () => {
     });
     expect(result.policyEvaluations[0].evaluationId).toBe('eval-1');
     expect(result.policyEvaluations[0].isBlocking).toBe(true);
-    expect(result.policyEvaluations[0].configurationTypeDisplayName).toBe('Minimum reviewers');
+    expect(result.policyEvaluations[0].configurationTypeDisplayName).toBe(
+      'Minimum reviewers',
+    );
   });
 
   it('resolves project name to ID via coreApi', async () => {
@@ -102,7 +108,11 @@ describe('getPullRequestChecks', () => {
       getCoreApi: jest.fn().mockResolvedValue(coreApi),
     } as unknown as WebApi;
     await expect(
-      getPullRequestChecks(conn, { projectId: 'missing-project', repositoryId: 'r', pullRequestId: 1 }),
+      getPullRequestChecks(conn, {
+        projectId: 'missing-project',
+        repositoryId: 'r',
+        pullRequestId: 1,
+      }),
     ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
   });
 
@@ -115,21 +125,30 @@ describe('getPullRequestChecks', () => {
     await expect(
       getPullRequestChecks(conn, {
         projectId: '11111111-1111-1111-1111-111111111111',
-        repositoryId: 'r', pullRequestId: 1,
+        repositoryId: 'r',
+        pullRequestId: 1,
       }),
     ).rejects.toThrow('Failed to get pull request checks');
   });
 
   it('handles null status and evaluation lists', async () => {
-    const gitApi = { getPullRequestStatuses: jest.fn().mockResolvedValue(null) };
-    const policyApi = { getPolicyEvaluations: jest.fn().mockResolvedValue(null) };
+    const gitApi = {
+      getPullRequestStatuses: jest.fn().mockResolvedValue(null),
+    };
+    const policyApi = {
+      getPolicyEvaluations: jest.fn().mockResolvedValue(null),
+    };
     const conn = {
       getGitApi: jest.fn().mockResolvedValue(gitApi),
       getPolicyApi: jest.fn().mockResolvedValue(policyApi),
-      getCoreApi: jest.fn().mockResolvedValue({ getProject: jest.fn().mockResolvedValue({ id: 'g' }) }),
+      getCoreApi: jest.fn().mockResolvedValue({
+        getProject: jest.fn().mockResolvedValue({ id: 'g' }),
+      }),
     } as unknown as WebApi;
     const result = await getPullRequestChecks(conn, {
-      projectId: 'my-project', repositoryId: 'r', pullRequestId: 1,
+      projectId: 'my-project',
+      repositoryId: 'r',
+      pullRequestId: 1,
     });
     expect(result.statuses).toHaveLength(0);
     expect(result.policyEvaluations).toHaveLength(0);

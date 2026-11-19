@@ -1,7 +1,10 @@
 import { WebApi } from 'azure-devops-node-api';
 import { GitVersionType } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { AzureDevOpsError } from '../../../shared/errors';
-import { getFileContent, FileContentResponse } from '../get-file-content/feature';
+import {
+  getFileContent,
+  FileContentResponse,
+} from '../get-file-content/feature';
 
 function toVersionType(type: 'branch' | 'commit' | 'tag'): GitVersionType {
   switch (type) {
@@ -23,12 +26,17 @@ export async function getRepositoryFile(
   versionType: 'branch' | 'commit' | 'tag' = 'branch',
 ): Promise<FileContentResponse> {
   try {
-    const versionDescriptor =
-      version
-        ? { versionType: toVersionType(versionType), version }
-        : undefined;
+    const versionDescriptor = version
+      ? { versionType: toVersionType(versionType), version }
+      : undefined;
 
-    return await getFileContent(connection, projectId, repositoryId, path, versionDescriptor);
+    return await getFileContent(
+      connection,
+      projectId,
+      repositoryId,
+      path,
+      versionDescriptor,
+    );
   } catch (error) {
     if (error instanceof AzureDevOpsError) throw error;
     throw new AzureDevOpsError(

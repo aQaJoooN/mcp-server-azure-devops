@@ -121,17 +121,20 @@ export const repositoriesTools: ToolDefinition[] = [
   },
   {
     name: 'get_commit_details',
-    description: 'Retrieves commit metadata, author, message, and timestamp for a specific commit',
+    description:
+      'Retrieves commit metadata, author, message, and timestamp for a specific commit',
     inputSchema: toJsonSchema(GetCommitDetailsSchema),
   },
   {
     name: 'get_commit_diff',
-    description: 'Retrieves the list of file changes (paths and change types) introduced by a specific commit',
+    description:
+      'Retrieves the list of file changes (paths and change types) introduced by a specific commit',
     inputSchema: toJsonSchema(GetCommitDiffSchema),
   },
   {
     name: 'get_repository_file',
-    description: 'Retrieves a repository file at a specific commit, branch, or tag',
+    description:
+      'Retrieves a repository file at a specific commit, branch, or tag',
     inputSchema: toJsonSchema(GetRepositoryFileSchema),
   },
   {

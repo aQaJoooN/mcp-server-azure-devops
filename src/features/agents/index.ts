@@ -56,12 +56,20 @@ export const handleAgentsRequest: RequestHandler = async (
         args.agentId,
         args.includeCapabilities,
       );
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_agent_capabilities': {
       const args = GetAgentCapabilitiesSchema.parse(request.params.arguments);
-      const result = await getAgentCapabilities(connection, args.poolId, args.agentId);
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      const result = await getAgentCapabilities(
+        connection,
+        args.poolId,
+        args.agentId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_agent_job_history': {
       const args = GetAgentJobHistorySchema.parse(request.params.arguments);
@@ -71,22 +79,40 @@ export const handleAgentsRequest: RequestHandler = async (
         args.agentId,
         args.top,
       );
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_agent_pool_status': {
       const args = GetAgentPoolStatusSchema.parse(request.params.arguments);
       const result = await getAgentPoolStatus(connection, args.poolId);
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_agent_image_version': {
       const args = GetAgentImageVersionSchema.parse(request.params.arguments);
-      const result = await getAgentImageVersion(connection, args.poolId, args.agentId);
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      const result = await getAgentImageVersion(
+        connection,
+        args.poolId,
+        args.agentId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     case 'get_agent_environment_summary': {
-      const args = GetAgentEnvironmentSummarySchema.parse(request.params.arguments);
-      const result = await getAgentEnvironmentSummary(connection, args.poolId, args.agentId);
-      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      const args = GetAgentEnvironmentSummarySchema.parse(
+        request.params.arguments,
+      );
+      const result = await getAgentEnvironmentSummary(
+        connection,
+        args.poolId,
+        args.agentId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
     }
     default:
       throw new Error(`Unknown agents tool: ${request.params.name}`);

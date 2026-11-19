@@ -25,7 +25,10 @@ jest.mock('./compare-failed-successful-builds/feature');
 
 const mockConnection = {} as WebApi;
 
-function makeRequest(name: string, args: Record<string, unknown> = {}): CallToolRequest {
+function makeRequest(
+  name: string,
+  args: Record<string, unknown> = {},
+): CallToolRequest {
   return {
     params: { name, arguments: args },
     method: 'tools/call',
@@ -61,7 +64,11 @@ describe('handleBuildsRequest', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('handles get_build_details', async () => {
-    const mockBuild = { id: 42, buildNumber: '20240101.1', status: 'completed' };
+    const mockBuild = {
+      id: 42,
+      buildNumber: '20240101.1',
+      status: 'completed',
+    };
     (getBuildDetails as jest.Mock).mockResolvedValue(mockBuild);
     const res = await handleBuildsRequest(
       mockConnection,
@@ -111,11 +118,19 @@ describe('handleBuildsRequest', () => {
   });
 
   it('handles compare_builds', async () => {
-    const mockResult = { build1: { id: 1 }, build2: { id: 2 }, differences: [] };
+    const mockResult = {
+      build1: { id: 1 },
+      build2: { id: 2 },
+      differences: [],
+    };
     (compareBuilds as jest.Mock).mockResolvedValue(mockResult);
     const res = await handleBuildsRequest(
       mockConnection,
-      makeRequest('compare_builds', { projectId: 'proj', buildId1: 1, buildId2: 2 }),
+      makeRequest('compare_builds', {
+        projectId: 'proj',
+        buildId1: 1,
+        buildId2: 2,
+      }),
     );
     expect(JSON.parse(res.content[0].text)).toEqual(mockResult);
   });
@@ -145,7 +160,10 @@ describe('handleBuildsRequest', () => {
     (getLastSuccessfulBuild as jest.Mock).mockResolvedValue(mockBuild);
     const res = await handleBuildsRequest(
       mockConnection,
-      makeRequest('get_last_successful_build', { projectId: 'proj', definitionId: 1 }),
+      makeRequest('get_last_successful_build', {
+        projectId: 'proj',
+        definitionId: 1,
+      }),
     );
     expect(JSON.parse(res.content[0].text)).toEqual(mockBuild);
   });
@@ -154,7 +172,10 @@ describe('handleBuildsRequest', () => {
     (getLastSuccessfulBuild as jest.Mock).mockResolvedValue(null);
     const res = await handleBuildsRequest(
       mockConnection,
-      makeRequest('get_last_successful_build', { projectId: 'proj', definitionId: 1 }),
+      makeRequest('get_last_successful_build', {
+        projectId: 'proj',
+        definitionId: 1,
+      }),
     );
     expect(res.content[0].text).toBe('No successful build found');
   });
