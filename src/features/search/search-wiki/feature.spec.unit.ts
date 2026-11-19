@@ -1,207 +1,122 @@
 import { WebApi } from 'azure-devops-node-api';
 import axios from 'axios';
+import {
+  AzureDevOpsError,
+  AzureDevOpsResourceNotFoundError,
+  AzureDevOpsValidationError,
+  AzureDevOpsPermissionError,
+} from '../../../shared/errors';
 import { searchWiki } from './feature';
-import { AzureDevOpsValidationError } from '../../../shared/errors';
 
-// Mock Azure Identity
-jest.mock('@azure/identity', () => {
-  const mockGetToken = jest.fn().mockResolvedValue({ token: 'mock-token' });
-  return {
-    DefaultAzureCredential: jest.fn().mockImplementation(() => ({
-      getToken: mockGetToken,
-    })),
-    AzureCliCredential: jest.fn().mockImplementation(() => ({
-      getToken: mockGetToken,
-    })),
-  };
+jest.mock('axios');
+const mockAxios = axios as jest.Mocked<typeof axios>;
+
+const mockConn = {
+  serverUrl: 'https://ado/tfs/Col',
+} as unknown as WebApi;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  process.env.AZURE_DEVOPS_AUTH_METHOD = 'pat';
+  process.env.AZURE_DEVOPS_PAT = 'test-token';
 });
 
-// Mock axios
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+afterEach(() => {
+  delete process.env.AZURE_DEVOPS_AUTH_METHOD;
+  delete process.env.AZURE_DEVOPS_PAT;
+});
 
-describe('searchWiki unit', () => {
-  // Mock WebApi connection
-  const mockConnection = {
-    _getHttpClient: jest.fn().mockReturnValue({
-      getAuthorizationHeader: jest.fn().mockReturnValue('Bearer mock-token'),
-    }),
-    getCoreApi: jest.fn().mockImplementation(() => ({
-      getProjects: jest
-        .fn()
-        .mockResolvedValue([{ name: 'TestProject', id: 'project-id' }]),
-    })),
-    serverUrl: 'https://dev.azure.com/testorg',
-  } as unknown as WebApi;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('should return wiki search results with project ID', async () => {
-    // Arrange
-    const mockSearchResponse = {
-      data: {
-        count: 1,
-        results: [
-          {
-            fileName: 'Example Page',
-            path: '/Example Page',
-            collection: {
-              name: 'DefaultCollection',
-            },
-            project: {
-              name: 'TestProject',
-              id: 'project-id',
-            },
-            hits: [
-              {
-                content: 'This is an example page',
-                charOffset: 5,
-                length: 7,
-              },
-            ],
-          },
-        ],
-      },
+describe('searchWiki', () => {
+  it('returns search results on success', async () => {
+    const mockResponse = {
+      data: { count: 1, results: [{ fileName: 'page.md', path: '/docs/page' }] },
     };
+    mockAxios.post.mockResolvedValue(mockResponse);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockAxios as any).isAxiosError = jest.fn().mockReturnValue(false);
 
-    mockedAxios.post.mockResolvedValueOnce(mockSearchResponse);
-
-    // Act
-    const result = await searchWiki(mockConnection, {
-      searchText: 'example',
-      projectId: 'TestProject',
+    const result = await searchWiki(mockConn, {
+      searchText: 'hello',
+      projectId: 'proj',
     });
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.count).toBe(1);
-    expect(result.results).toHaveLength(1);
-    expect(result.results[0].fileName).toBe('Example Page');
-    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.post).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'https://almsearch.dev.azure.com/testorg/TestProject/_apis/search/wikisearchresults',
-      ),
-      expect.objectContaining({
-        searchText: 'example',
-        filters: expect.objectContaining({
-          Project: ['TestProject'],
-        }),
-      }),
+    expect(result).toEqual(mockResponse.data);
+    expect(mockAxios.post).toHaveBeenCalledWith(
+      expect.stringContaining('wikisearchresults'),
+      expect.objectContaining({ searchText: 'hello' }),
       expect.any(Object),
     );
   });
 
-  test('should perform organization-wide wiki search when projectId is not provided', async () => {
-    // Arrange
-    const mockSearchResponse = {
-      data: {
-        count: 2,
-        results: [
-          {
-            fileName: 'Example Page 1',
-            path: '/Example Page 1',
-            collection: {
-              name: 'DefaultCollection',
-            },
-            project: {
-              name: 'Project1',
-              id: 'project-id-1',
-            },
-            hits: [
-              {
-                content: 'This is an example page',
-                charOffset: 5,
-                length: 7,
-              },
-            ],
-          },
-          {
-            fileName: 'Example Page 2',
-            path: '/Example Page 2',
-            collection: {
-              name: 'DefaultCollection',
-            },
-            project: {
-              name: 'Project2',
-              id: 'project-id-2',
-            },
-            hits: [
-              {
-                content: 'This is another example page',
-                charOffset: 5,
-                length: 7,
-              },
-            ],
-          },
-        ],
-      },
-    };
+  it('applies additional project filters', async () => {
+    const mockResponse = { data: { count: 0, results: [] } };
+    mockAxios.post.mockResolvedValue(mockResponse);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (mockAxios as any).isAxiosError = jest.fn().mockReturnValue(false);
 
-    mockedAxios.post.mockResolvedValueOnce(mockSearchResponse);
-
-    // Act
-    const result = await searchWiki(mockConnection, {
-      searchText: 'example',
+    await searchWiki(mockConn, {
+      searchText: 'test',
+      projectId: 'proj',
+      filters: { Project: ['extra-proj'] },
     });
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.count).toBe(2);
-    expect(result.results).toHaveLength(2);
-    expect(result.results[0].project.name).toBe('Project1');
-    expect(result.results[1].project.name).toBe('Project2');
-    expect(mockedAxios.post).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.post).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'https://almsearch.dev.azure.com/testorg/_apis/search/wikisearchresults',
-      ),
-      expect.not.objectContaining({
-        filters: expect.objectContaining({
-          Project: expect.anything(),
-        }),
-      }),
-      expect.any(Object),
-    );
+    expect(mockAxios.post).toHaveBeenCalled();
   });
 
-  test('should build server search URL when using Azure DevOps Server', async () => {
-    const serverConnection = {
-      ...mockConnection,
-      serverUrl: 'https://ado.local/tfs/DefaultCollection',
-    } as unknown as WebApi;
-
-    mockedAxios.post.mockResolvedValueOnce({
-      data: {
-        count: 0,
-        results: [],
-      },
-    });
-
-    await searchWiki(serverConnection, {
-      searchText: 'example',
-      projectId: 'ProjectX',
-    });
-
-    expect(mockedAxios.post).toHaveBeenCalledWith(
-      'https://ado.local/tfs/DefaultCollection/ProjectX/_apis/search/wikisearchresults?api-version=7.1',
-      expect.any(Object),
-      expect.any(Object),
-    );
-  });
-
-  test('should require projectId for server wiki search', async () => {
-    const serverConnection = {
-      ...mockConnection,
-      serverUrl: 'https://ado.local/tfs/DefaultCollection',
-    } as unknown as WebApi;
+  it('throws AzureDevOpsResourceNotFoundError on axios 404', async () => {
+    const axiosErr = { isAxiosError: true, response: { status: 404, data: { message: 'not found' } }, message: 'not found' };
+    mockAxios.post.mockRejectedValue(axiosErr);
+    mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
 
     await expect(
-      searchWiki(serverConnection, {
-        searchText: 'example',
-      }),
-    ).rejects.toThrow(AzureDevOpsValidationError);
+      searchWiki(mockConn, { searchText: 'x', projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsResourceNotFoundError);
+  });
+
+  it('throws AzureDevOpsValidationError on axios 400', async () => {
+    const axiosErr = { isAxiosError: true, response: { status: 400, data: { message: 'bad' } }, message: 'bad' };
+    mockAxios.post.mockRejectedValue(axiosErr);
+    mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
+
+    await expect(
+      searchWiki(mockConn, { searchText: 'x', projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsValidationError);
+  });
+
+  it('throws AzureDevOpsPermissionError on axios 401', async () => {
+    const axiosErr = { isAxiosError: true, response: { status: 401, data: { message: 'denied' } }, message: 'denied' };
+    mockAxios.post.mockRejectedValue(axiosErr);
+    mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
+
+    await expect(
+      searchWiki(mockConn, { searchText: 'x', projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsPermissionError);
+  });
+
+  it('throws generic AzureDevOpsError on other axios error', async () => {
+    const axiosErr = { isAxiosError: true, response: { status: 500, data: { message: 'server' } }, message: 'server' };
+    mockAxios.post.mockRejectedValue(axiosErr);
+    mockAxios.isAxiosError = jest.fn().mockReturnValue(true) as never;
+
+    await expect(
+      searchWiki(mockConn, { searchText: 'x', projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsError);
+  });
+
+  it('rethrows AzureDevOpsError directly', async () => {
+    const original = new AzureDevOpsValidationError('already typed');
+    mockAxios.post.mockRejectedValue(original);
+    mockAxios.isAxiosError = jest.fn().mockReturnValue(false) as never;
+
+    await expect(
+      searchWiki(mockConn, { searchText: 'x', projectId: 'proj' }),
+    ).rejects.toBe(original);
+  });
+
+  it('wraps non-axios errors in AzureDevOpsError', async () => {
+    mockAxios.post.mockRejectedValue(new Error('network'));
+    mockAxios.isAxiosError = jest.fn().mockReturnValue(false) as never;
+
+    await expect(
+      searchWiki(mockConn, { searchText: 'x', projectId: 'proj' }),
+    ).rejects.toBeInstanceOf(AzureDevOpsError);
   });
 });

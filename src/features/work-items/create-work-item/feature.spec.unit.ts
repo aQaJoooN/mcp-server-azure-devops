@@ -1,110 +1,81 @@
+import { WebApi } from 'azure-devops-node-api';
 import { createWorkItem } from './feature';
-import { AzureDevOpsError } from '../../../shared/errors';
 
-// Unit tests should only focus on isolated logic
-// No real connections, HTTP requests, or dependencies
-describe('createWorkItem unit', () => {
-  // Test for required title validation
-  test('should throw error when title is not provided', async () => {
-    // Arrange - mock connection, never used due to validation error
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
+function makeConn(workItem: unknown) {
+  const witApi = { createWorkItem: jest.fn().mockResolvedValue(workItem) };
+  return {
+    getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
+    serverUrl: 'https://ado/tfs/Col',
+  } as unknown as WebApi;
+}
 
-    // Act & Assert
+describe('createWorkItem', () => {
+  it('throws when title is missing', async () => {
+    const conn = makeConn(null);
     await expect(
-      createWorkItem(
-        mockConnection,
-        'TestProject',
-        'Task',
-        { title: '' }, // Empty title
-      ),
+      createWorkItem(conn, 'proj', 'Task', { title: '' }),
     ).rejects.toThrow('Title is required');
   });
 
-  // Test for error propagation
-  test('should propagate custom errors when thrown internally', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new AzureDevOpsError('Custom error');
-      }),
-    };
-
-    // Act & Assert
-    await expect(
-      createWorkItem(mockConnection, 'TestProject', 'Task', {
-        title: 'Test Task',
-      }),
-    ).rejects.toThrow(AzureDevOpsError);
-
-    await expect(
-      createWorkItem(mockConnection, 'TestProject', 'Task', {
-        title: 'Test Task',
-      }),
-    ).rejects.toThrow('Custom error');
+  it('creates work item with required title', async () => {
+    const mockWI = { id: 1, fields: { 'System.Title': 'My Task' } };
+    const conn = makeConn(mockWI);
+    const result = await createWorkItem(conn, 'proj', 'Task', { title: 'My Task' });
+    expect(result).toEqual(mockWI);
   });
 
-  test('should wrap unexpected errors in a friendly error message', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new Error('Unexpected error');
-      }),
-    };
-
-    // Act & Assert
+  it('throws when API returns null', async () => {
+    const conn = makeConn(null);
     await expect(
-      createWorkItem(mockConnection, 'TestProject', 'Task', {
-        title: 'Test Task',
-      }),
-    ).rejects.toThrow('Failed to create work item: Unexpected error');
+      createWorkItem(conn, 'proj', 'Task', { title: 'Test' }),
+    ).rejects.toThrow('Failed to create work item');
   });
 
-  test('should include System.Tags patch entry when tags option is provided', async () => {
-    const mockCreateWorkItem = jest.fn().mockResolvedValue({ id: 1 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        createWorkItem: mockCreateWorkItem,
-      }),
-    };
+  it('builds full patch document with all optional fields', async () => {
+    const mockWI = { id: 2 };
+    const witApi = { createWorkItem: jest.fn().mockResolvedValue(mockWI) };
+    const conn = {
+      getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
+      serverUrl: 'https://ado/tfs/Col',
+    } as unknown as WebApi;
 
-    await createWorkItem(mockConnection, 'TestProject', 'Task', {
-      title: 'Test Task',
-      tags: ['bug', 'frontend'],
+    await createWorkItem(conn, 'proj', 'Bug', {
+      title: 'Fix bug',
+      description: 'Steps to reproduce',
+      assignedTo: 'alice@test.com',
+      areaPath: 'MyProject\\Area',
+      iterationPath: 'Sprint 1',
+      priority: 1,
+      parentId: 100,
+      tags: ['critical', 'backend'],
+      additionalFields: { 'Custom.Field': 'value' },
     });
 
-    expect(mockCreateWorkItem).toHaveBeenCalledWith(
-      null,
-      expect.arrayContaining([
-        {
-          op: 'add',
-          path: '/fields/System.Tags',
-          value: 'bug; frontend',
-        },
-      ]),
-      'TestProject',
-      'Task',
-    );
+    const patchDoc: { path: string; value: unknown }[] = witApi.createWorkItem.mock.calls[0][1];
+    const paths = patchDoc.map((p) => p.path);
+
+    expect(paths).toContain('/fields/System.Title');
+    expect(paths).toContain('/fields/System.Description');
+    expect(paths).toContain('/fields/System.AssignedTo');
+    expect(paths).toContain('/fields/System.AreaPath');
+    expect(paths).toContain('/fields/System.IterationPath');
+    expect(paths).toContain('/fields/Microsoft.VSTS.Common.Priority');
+    expect(paths).toContain('/relations/-');
+    expect(paths).toContain('/fields/System.Tags');
+    expect(paths).toContain('/fields/Custom.Field');
+
+    const tagsEntry = patchDoc.find((p) => p.path === '/fields/System.Tags');
+    expect(tagsEntry?.value).toBe('critical; backend');
   });
 
-  test('should not include System.Tags patch entry when tags option is empty', async () => {
-    const mockCreateWorkItem = jest.fn().mockResolvedValue({ id: 1 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        createWorkItem: mockCreateWorkItem,
-      }),
-    };
-
-    await createWorkItem(mockConnection, 'TestProject', 'Task', {
-      title: 'Test Task',
-      tags: [],
-    });
-
-    const document = mockCreateWorkItem.mock.calls[0][1];
-    const tagsPatch = document.find(
-      (entry: any) => entry.path === '/fields/System.Tags',
+  it('wraps API errors', async () => {
+    const witApi = { createWorkItem: jest.fn().mockRejectedValue(new Error('server error')) };
+    const conn = {
+      getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
+      serverUrl: 'https://ado/tfs/Col',
+    } as unknown as WebApi;
+    await expect(createWorkItem(conn, 'proj', 'Task', { title: 'x' })).rejects.toThrow(
+      'Failed to create work item',
     );
-    expect(tagsPatch).toBeUndefined();
   });
 });

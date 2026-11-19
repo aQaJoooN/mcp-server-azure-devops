@@ -1,85 +1,91 @@
+import { WebApi } from 'azure-devops-node-api';
 import { deleteWorkItemAttachment } from './feature';
-import { AzureDevOpsError } from '../../../shared/errors';
 
-// Unit tests should only focus on isolated logic
-// No real connections, HTTP requests, or dependencies
-describe('deleteWorkItemAttachment unit', () => {
-  beforeEach(() => {
-    // Reset all mocks before each test
-    jest.clearAllMocks();
-  });
+function makeWitApi(workItem: unknown, updatedWorkItem: unknown = { id: 1 }) {
+  return {
+    getWorkItem: jest.fn().mockResolvedValue(workItem),
+    updateWorkItem: jest.fn().mockResolvedValue(updatedWorkItem),
+  };
+}
 
-  // Test for required workItemId validation
-  test('should throw error when workItemId is not provided', async () => {
-    // Arrange - mock connection, never used due to validation error
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
+function makeConn(witApi: unknown) {
+  return {
+    getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
+  } as unknown as WebApi;
+}
 
-    // Act & Assert
+describe('deleteWorkItemAttachment', () => {
+  it('throws when workItemId is missing', async () => {
+    const conn = makeConn(makeWitApi(null));
     await expect(
-      deleteWorkItemAttachment(mockConnection, {
-        workItemId: 0, // Invalid work item ID
-        attachmentId: 'abc-123',
-      }),
+      deleteWorkItemAttachment(conn, { workItemId: 0, attachmentId: 'abc' }),
     ).rejects.toThrow('Work item ID is required');
   });
 
-  // Test for required attachmentId validation
-  test('should throw error when attachmentId is not provided', async () => {
-    // Arrange - mock connection, never used due to validation error
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
-
-    // Act & Assert
+  it('throws when attachmentId is missing', async () => {
+    const conn = makeConn(makeWitApi(null));
     await expect(
-      deleteWorkItemAttachment(mockConnection, {
-        workItemId: 123,
-        attachmentId: '', // Empty attachment ID
-      }),
+      deleteWorkItemAttachment(conn, { workItemId: 1, attachmentId: '' }),
     ).rejects.toThrow('Attachment ID is required');
   });
 
-  // Test for error propagation
-  test('should propagate custom errors when thrown internally', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new AzureDevOpsError('Custom error');
-      }),
-    };
-
-    // Act & Assert
+  it('throws when work item not found', async () => {
+    const conn = makeConn(makeWitApi(null));
     await expect(
-      deleteWorkItemAttachment(mockConnection, {
-        workItemId: 123,
-        attachmentId: 'abc-123',
-      }),
-    ).rejects.toThrow(AzureDevOpsError);
-
-    await expect(
-      deleteWorkItemAttachment(mockConnection, {
-        workItemId: 123,
-        attachmentId: 'abc-123',
-      }),
-    ).rejects.toThrow('Custom error');
+      deleteWorkItemAttachment(conn, { workItemId: 99, attachmentId: 'abc' }),
+    ).rejects.toThrow('not found');
   });
 
-  test('should wrap unexpected errors in a friendly error message', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new Error('Unexpected error');
-      }),
+  it('throws when attachment not found on work item', async () => {
+    const workItem = {
+      id: 1,
+      relations: [
+        { rel: 'AttachedFile', url: 'https://ado/attachments/other-id' },
+      ],
     };
-
-    // Act & Assert
+    const conn = makeConn(makeWitApi(workItem));
     await expect(
-      deleteWorkItemAttachment(mockConnection, {
-        workItemId: 123,
-        attachmentId: 'abc-123',
-      }),
-    ).rejects.toThrow('Failed to delete attachment: Unexpected error');
+      deleteWorkItemAttachment(conn, { workItemId: 1, attachmentId: 'missing-attachment-id' }),
+    ).rejects.toThrow('not found');
+  });
+
+  it('removes attachment and returns updated work item', async () => {
+    const attachmentId = 'attach-123';
+    const workItem = {
+      id: 1,
+      relations: [
+        { rel: 'AttachedFile', url: `https://ado/attachments/${attachmentId}` },
+        { rel: 'Parent', url: 'https://ado/workitems/5' },
+      ],
+    };
+    const updatedWorkItem = { id: 1, relations: [{ rel: 'Parent', url: 'https://ado/workitems/5' }] };
+    const witApi = makeWitApi(workItem, updatedWorkItem);
+    const conn = makeConn(witApi);
+
+    const result = await deleteWorkItemAttachment(conn, { workItemId: 1, attachmentId });
+    expect(result).toEqual(updatedWorkItem);
+    expect(witApi.updateWorkItem).toHaveBeenCalledWith(
+      {},
+      [{ op: 'remove', path: '/relations/0' }],
+      1,
+      undefined,
+      false,
+      false,
+      false,
+      expect.any(Number),
+    );
+  });
+
+  it('throws when updateWorkItem returns null', async () => {
+    const attachmentId = 'attach-456';
+    const workItem = {
+      id: 1,
+      relations: [{ rel: 'AttachedFile', url: `https://ado/attachments/${attachmentId}` }],
+    };
+    const witApi = makeWitApi(workItem, null);
+    const conn = makeConn(witApi);
+    await expect(
+      deleteWorkItemAttachment(conn, { workItemId: 1, attachmentId }),
+    ).rejects.toThrow('Failed to update work item');
   });
 });

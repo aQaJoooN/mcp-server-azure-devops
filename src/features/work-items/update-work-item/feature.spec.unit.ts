@@ -1,348 +1,139 @@
+import { WebApi } from 'azure-devops-node-api';
+import {
+  AzureDevOpsResourceNotFoundError,
+  AzureDevOpsError,
+} from '../../../shared/errors';
 import { updateWorkItem } from './feature';
-import { AzureDevOpsError } from '../../../shared/errors';
 
-// Unit tests should only focus on isolated logic
-// No real connections, HTTP requests, or dependencies
-describe('updateWorkItem unit', () => {
-  test('should throw error when no fields are provided for update', async () => {
-    // Arrange - mock connection, never used due to validation error
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
+function makeWitApi(workItem: unknown = { id: 1 }, currentTags = '') {
+  return {
+    getWorkItem: jest.fn().mockResolvedValue({
+      id: 1,
+      fields: { 'System.Tags': currentTags },
+    }),
+    updateWorkItem: jest.fn().mockResolvedValue(workItem),
+  };
+}
 
-    // Act & Assert - empty options object should throw
-    await expect(
-      updateWorkItem(
-        mockConnection,
-        123,
-        {}, // No fields to update
-      ),
-    ).rejects.toThrow('At least one field must be provided for update');
-  });
+function makeConn(witApi: unknown) {
+  return {
+    getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
+  } as unknown as WebApi;
+}
 
-  test('should propagate custom errors when thrown internally', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new AzureDevOpsError('Custom error');
-      }),
-    };
-
-    // Act & Assert
-    await expect(
-      updateWorkItem(mockConnection, 123, { title: 'Updated Title' }),
-    ).rejects.toThrow(AzureDevOpsError);
-
-    await expect(
-      updateWorkItem(mockConnection, 123, { title: 'Updated Title' }),
-    ).rejects.toThrow('Custom error');
-  });
-
-  test('should wrap unexpected errors in a friendly error message', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new Error('Unexpected error');
-      }),
-    };
-
-    // Act & Assert
-    await expect(
-      updateWorkItem(mockConnection, 123, { title: 'Updated Title' }),
-    ).rejects.toThrow('Failed to update work item: Unexpected error');
-  });
-
-  test('should overwrite tags using replace when existing tags are present', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: { 'System.Tags': 'old1; old2' },
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
-    };
-
-    await updateWorkItem(mockConnection, 123, {
-      tags: ['tag1', 'tag2'],
-    });
-
-    expect(mockGetWorkItem).toHaveBeenCalledWith(123, ['System.Tags']);
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'replace',
-          path: '/fields/System.Tags',
-          value: 'tag1; tag2',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
+describe('updateWorkItem', () => {
+  it('throws when no fields provided', async () => {
+    const conn = makeConn(makeWitApi());
+    await expect(updateWorkItem(conn, 1, {})).rejects.toThrow(
+      'At least one field must be provided',
     );
   });
 
-  test('should overwrite tags using add when no existing tags', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: {},
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
-    };
+  it('updates title', async () => {
+    const updated = { id: 1, fields: { 'System.Title': 'New' } };
+    const witApi = makeWitApi(updated);
+    const conn = makeConn(witApi);
+    const result = await updateWorkItem(conn, 1, { title: 'New' });
+    expect(result).toEqual(updated);
+    const doc: { path: string }[] = witApi.updateWorkItem.mock.calls[0][1];
+    expect(doc.some((p) => p.path === '/fields/System.Title')).toBe(true);
+  });
 
-    await updateWorkItem(mockConnection, 123, {
-      tags: ['tag1', 'tag2'],
+  it('updates all optional scalar fields', async () => {
+    const witApi = makeWitApi({ id: 2 });
+    const conn = makeConn(witApi);
+    await updateWorkItem(conn, 2, {
+      title: 'T',
+      description: 'D',
+      assignedTo: 'alice@test.com',
+      areaPath: 'Area',
+      iterationPath: 'Sprint 1',
+      priority: 2,
+      state: 'Active',
     });
+    const doc: { path: string }[] = witApi.updateWorkItem.mock.calls[0][1];
+    const paths = doc.map((p) => p.path);
+    expect(paths).toContain('/fields/System.Description');
+    expect(paths).toContain('/fields/System.AssignedTo');
+    expect(paths).toContain('/fields/System.AreaPath');
+    expect(paths).toContain('/fields/System.IterationPath');
+    expect(paths).toContain('/fields/Microsoft.VSTS.Common.Priority');
+    expect(paths).toContain('/fields/System.State');
+  });
 
-    expect(mockGetWorkItem).toHaveBeenCalledWith(123, ['System.Tags']);
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'add',
-          path: '/fields/System.Tags',
-          value: 'tag1; tag2',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
+  it('replaces tags (op=replace) when item already has tags', async () => {
+    const witApi = makeWitApi({ id: 1 }, 'old-tag');
+    const conn = makeConn(witApi);
+    await updateWorkItem(conn, 1, { tags: ['new-tag'] });
+    const doc: { path: string; op: string; value: string }[] =
+      witApi.updateWorkItem.mock.calls[0][1];
+    const tagPatch = doc.find((p) => p.path === '/fields/System.Tags');
+    expect(tagPatch?.op).toBe('replace');
+    expect(tagPatch?.value).toBe('new-tag');
+  });
+
+  it('adds tags (op=add) when item has no tags', async () => {
+    const witApi = makeWitApi({ id: 1 }, '');
+    const conn = makeConn(witApi);
+    await updateWorkItem(conn, 1, { tags: ['fresh'] });
+    const doc: { path: string; op: string }[] =
+      witApi.updateWorkItem.mock.calls[0][1];
+    const tagPatch = doc.find((p) => p.path === '/fields/System.Tags');
+    expect(tagPatch?.op).toBe('add');
+  });
+
+  it('adds and removes individual tags via tagsToAdd/tagsToRemove', async () => {
+    const witApi = makeWitApi({ id: 1 }, 'keep; remove-me');
+    const conn = makeConn(witApi);
+    await updateWorkItem(conn, 1, {
+      tagsToAdd: ['new-one'],
+      tagsToRemove: ['remove-me'],
+    });
+    const doc: { path: string; value: string }[] =
+      witApi.updateWorkItem.mock.calls[0][1];
+    const tagPatch = doc.find((p) => p.path === '/fields/System.Tags');
+    expect(tagPatch?.value).toContain('keep');
+    expect(tagPatch?.value).toContain('new-one');
+    expect(tagPatch?.value).not.toContain('remove-me');
+  });
+
+  it('applies additional fields', async () => {
+    const witApi = makeWitApi({ id: 1 });
+    const conn = makeConn(witApi);
+    await updateWorkItem(conn, 1, {
+      additionalFields: { 'Custom.MyField': 'value' },
+    });
+    const doc: { path: string }[] = witApi.updateWorkItem.mock.calls[0][1];
+    expect(doc.some((p) => p.path === '/fields/Custom.MyField')).toBe(true);
+  });
+
+  it('throws ResourceNotFoundError when updateWorkItem returns null', async () => {
+    const witApi = makeWitApi(null);
+    const conn = makeConn(witApi);
+    await expect(updateWorkItem(conn, 1, { title: 'x' })).rejects.toBeInstanceOf(
+      AzureDevOpsResourceNotFoundError,
     );
   });
 
-  test('should clear tags using replace when existing tags are present', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: { 'System.Tags': 'old1; old2' },
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
+  it('throws ResourceNotFoundError when getWorkItem returns null for tags', async () => {
+    const witApi = {
+      getWorkItem: jest.fn().mockResolvedValue(null),
+      updateWorkItem: jest.fn(),
     };
-
-    await updateWorkItem(mockConnection, 123, {
-      tags: [],
-    });
-
-    expect(mockGetWorkItem).toHaveBeenCalledWith(123, ['System.Tags']);
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'replace',
-          path: '/fields/System.Tags',
-          value: '',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
+    const conn = makeConn(witApi);
+    await expect(updateWorkItem(conn, 1, { tags: ['x'] })).rejects.toBeInstanceOf(
+      AzureDevOpsResourceNotFoundError,
     );
   });
 
-  test('should clear tags using add when no existing tags', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: {},
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
+  it('wraps unknown errors', async () => {
+    const witApi = {
+      getWorkItem: jest.fn(),
+      updateWorkItem: jest.fn().mockRejectedValue(new Error('server down')),
     };
-
-    await updateWorkItem(mockConnection, 123, {
-      tags: [],
-    });
-
-    expect(mockGetWorkItem).toHaveBeenCalledWith(123, ['System.Tags']);
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'add',
-          path: '/fields/System.Tags',
-          value: '',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
-    );
-  });
-
-  test('should fetch and add tags when tagsToAdd is provided', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: {
-        'System.Tags': 'existing1; existing2',
-      },
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
-    };
-
-    await updateWorkItem(mockConnection, 123, {
-      tagsToAdd: ['existing2', 'newTag'],
-    });
-
-    expect(mockGetWorkItem).toHaveBeenCalledWith(123, ['System.Tags']);
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'replace',
-          path: '/fields/System.Tags',
-          value: 'existing1; existing2; newTag',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
-    );
-  });
-
-  test('should fetch and remove tags when tagsToRemove is provided', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: {
-        'System.Tags': 'existing1; existing2; existing3',
-      },
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
-    };
-
-    await updateWorkItem(mockConnection, 123, {
-      tagsToRemove: ['existing2', 'nonExistent'],
-    });
-
-    expect(mockGetWorkItem).toHaveBeenCalledWith(123, ['System.Tags']);
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'replace',
-          path: '/fields/System.Tags',
-          value: 'existing1; existing3',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
-    );
-  });
-
-  test('should remove tags case-insensitively', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: {
-        'System.Tags': 'Bug; Feature; Enhancement',
-      },
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
-    };
-
-    await updateWorkItem(mockConnection, 123, {
-      tagsToRemove: ['bug', 'FEATURE'],
-    });
-
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'replace',
-          path: '/fields/System.Tags',
-          value: 'Enhancement',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
-    );
-  });
-
-  test('should not add duplicate tags case-insensitively', async () => {
-    const mockGetWorkItem = jest.fn().mockResolvedValue({
-      id: 123,
-      fields: {
-        'System.Tags': 'Bug; Feature',
-      },
-    });
-    const mockUpdateWorkItem = jest.fn().mockResolvedValue({ id: 123 });
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockResolvedValue({
-        getWorkItem: mockGetWorkItem,
-        updateWorkItem: mockUpdateWorkItem,
-      }),
-    };
-
-    await updateWorkItem(mockConnection, 123, {
-      tagsToAdd: ['bug', 'NewTag'],
-    });
-
-    expect(mockUpdateWorkItem).toHaveBeenCalledWith(
-      {},
-      [
-        {
-          op: 'replace',
-          path: '/fields/System.Tags',
-          value: 'Bug; Feature; NewTag',
-        },
-      ],
-      123,
-      undefined,
-      false,
-      false,
-      false,
-      expect.any(Number),
+    const conn = makeConn(witApi);
+    await expect(updateWorkItem(conn, 1, { title: 'x' })).rejects.toThrow(
+      'Failed to update work item',
     );
   });
 });

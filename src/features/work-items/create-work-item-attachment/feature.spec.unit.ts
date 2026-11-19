@@ -1,93 +1,86 @@
-import { createWorkItemAttachment } from './feature';
-import { AzureDevOpsError } from '../../../shared/errors';
+import { WebApi } from 'azure-devops-node-api';
 import * as fs from 'fs';
+import { createWorkItemAttachment } from './feature';
 
-// Mock the fs module
 jest.mock('fs');
-const mockedFs = jest.mocked(fs);
+const mockFs = fs as jest.Mocked<typeof fs>;
 
-// Unit tests should only focus on isolated logic
-// No real connections, HTTP requests, or dependencies
-describe('createWorkItemAttachment unit', () => {
-  beforeEach(() => {
-    // Reset all mocks before each test
-    jest.clearAllMocks();
-  });
+function makeWitApi(attachmentResult: unknown, updatedWorkItem: unknown) {
+  return {
+    createAttachment: jest.fn().mockResolvedValue(attachmentResult),
+    updateWorkItem: jest.fn().mockResolvedValue(updatedWorkItem),
+  };
+}
 
-  // Test for required filePath validation
-  test('should throw error when filePath is not provided', async () => {
-    // Arrange - mock connection, never used due to validation error
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
+function makeConn(witApi: unknown) {
+  return {
+    getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
+  } as unknown as WebApi;
+}
 
-    // Act & Assert
+describe('createWorkItemAttachment', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws when filePath is missing', async () => {
+    const conn = makeConn(makeWitApi(null, null));
     await expect(
-      createWorkItemAttachment(mockConnection, 123, {
-        filePath: '', // Empty file path
-      }),
+      createWorkItemAttachment(conn, 1, { filePath: '', fileName: 'test.txt' }),
     ).rejects.toThrow('File path is required');
   });
 
-  // Test for file existence validation
-  test('should throw error when file does not exist', async () => {
-    // Arrange - mock file does not exist
-    mockedFs.existsSync.mockReturnValue(false);
-
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
-
-    // Act & Assert
+  it('throws when file does not exist', async () => {
+    mockFs.existsSync.mockReturnValue(false);
+    const conn = makeConn(makeWitApi(null, null));
     await expect(
-      createWorkItemAttachment(mockConnection, 123, {
-        filePath: '/path/to/nonexistent/file.txt',
-      }),
-    ).rejects.toThrow('File does not exist: /path/to/nonexistent/file.txt');
+      createWorkItemAttachment(conn, 1, { filePath: '/tmp/missing.txt' }),
+    ).rejects.toThrow('File does not exist');
   });
 
-  // Test for error propagation
-  test('should propagate custom errors when thrown internally', async () => {
-    // Arrange - mock file exists
-    mockedFs.existsSync.mockReturnValue(true);
-    mockedFs.readFileSync.mockReturnValue(Buffer.from('test content'));
-
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new AzureDevOpsError('Custom error');
-      }),
-    };
-
-    // Act & Assert
+  it('throws when attachment upload returns no URL', async () => {
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue(Buffer.from('content') as never);
+    const conn = makeConn(makeWitApi({ url: null }, null));
     await expect(
-      createWorkItemAttachment(mockConnection, 123, {
-        filePath: '/path/to/file.txt',
-      }),
-    ).rejects.toThrow(AzureDevOpsError);
-
-    await expect(
-      createWorkItemAttachment(mockConnection, 123, {
-        filePath: '/path/to/file.txt',
-      }),
-    ).rejects.toThrow('Custom error');
+      createWorkItemAttachment(conn, 1, { filePath: '/tmp/file.txt' }),
+    ).rejects.toThrow('Failed to upload attachment');
   });
 
-  test('should wrap unexpected errors in a friendly error message', async () => {
-    // Arrange - mock file exists
-    mockedFs.existsSync.mockReturnValue(true);
-    mockedFs.readFileSync.mockReturnValue(Buffer.from('test content'));
+  it('creates attachment and returns updated work item', async () => {
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue(Buffer.from('file content') as never);
+    const attachmentResult = { url: 'https://ado/attachments/abc-123' };
+    const updatedWorkItem = { id: 5, relations: [{ rel: 'AttachedFile', url: 'https://ado/attachments/abc-123' }] };
+    const witApi = makeWitApi(attachmentResult, updatedWorkItem);
+    const conn = makeConn(witApi);
 
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new Error('Unexpected error');
-      }),
-    };
+    const result = await createWorkItemAttachment(conn, 5, {
+      filePath: '/tmp/file.txt',
+      fileName: 'my-file.txt',
+      comment: 'Adding evidence',
+    });
+    expect(result).toEqual(updatedWorkItem);
+    expect(witApi.createAttachment).toHaveBeenCalled();
+    expect(witApi.updateWorkItem).toHaveBeenCalledWith(
+      {},
+      expect.arrayContaining([
+        expect.objectContaining({ op: 'add', path: '/relations/-' }),
+      ]),
+      5,
+      undefined,
+      false,
+      false,
+      false,
+      expect.any(Number),
+    );
+  });
 
-    // Act & Assert
+  it('throws when updateWorkItem returns null', async () => {
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.readFileSync.mockReturnValue(Buffer.from('x') as never);
+    const witApi = makeWitApi({ url: 'https://ado/attachments/xyz' }, null);
+    const conn = makeConn(witApi);
     await expect(
-      createWorkItemAttachment(mockConnection, 123, {
-        filePath: '/path/to/file.txt',
-      }),
-    ).rejects.toThrow('Failed to create attachment: Unexpected error');
+      createWorkItemAttachment(conn, 1, { filePath: '/tmp/f.txt' }),
+    ).rejects.toThrow('Failed to update work item');
   });
 });

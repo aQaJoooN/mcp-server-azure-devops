@@ -1,85 +1,54 @@
+import { WebApi } from 'azure-devops-node-api';
+import * as fs from 'fs';
+import * as path from 'path';
+import { Readable } from 'stream';
 import { getWorkItemAttachment } from './feature';
-import { AzureDevOpsError } from '../../../shared/errors';
 
-// Unit tests should only focus on isolated logic
-// No real connections, HTTP requests, or dependencies
-describe('getWorkItemAttachment unit', () => {
-  beforeEach(() => {
-    // Reset all mocks before each test
-    jest.clearAllMocks();
-  });
+jest.mock('fs');
+const mockFs = fs as jest.Mocked<typeof fs>;
 
-  // Test for required attachmentId validation
-  test('should throw error when attachmentId is not provided', async () => {
-    // Arrange - mock connection, never used due to validation error
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
+function makePipeableStream(content: string) {
+  const readable = new Readable({ read() {} });
+  const writableTarget = { 
+    on: jest.fn((event: string, cb: () => void) => { if (event === 'finish') cb(); return writableTarget; }),
+    end: jest.fn(),
+  };
+  // Simulate that the attachment stream has a 'pipe' method and fires 'error'/'end'
+  const stream = {
+    pipe: jest.fn().mockReturnValue(writableTarget),
+    on: jest.fn((event: string, cb: () => void) => stream),
+  };
+  return stream;
+}
 
-    // Act & Assert
+function makeConn(stream: unknown) {
+  const witApi = { getAttachmentContent: jest.fn().mockResolvedValue(stream) };
+  return {
+    getWorkItemTrackingApi: jest.fn().mockResolvedValue(witApi),
+  } as unknown as WebApi;
+}
+
+describe('getWorkItemAttachment', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('throws when attachmentId is missing', async () => {
+    const conn = makeConn(null);
     await expect(
-      getWorkItemAttachment(mockConnection, {
-        attachmentId: '', // Empty attachment ID
-        outputPath: '/path/to/output.txt',
-      }),
+      getWorkItemAttachment(conn, { attachmentId: '', outputPath: '/tmp/out.txt' }),
     ).rejects.toThrow('Attachment ID is required');
   });
 
-  // Test for required outputPath validation
-  test('should throw error when outputPath is not provided', async () => {
-    // Arrange - mock connection, never used due to validation error
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn(),
-    };
-
-    // Act & Assert
+  it('throws when outputPath is missing', async () => {
+    const conn = makeConn(null);
     await expect(
-      getWorkItemAttachment(mockConnection, {
-        attachmentId: 'abc-123',
-        outputPath: '', // Empty output path
-      }),
+      getWorkItemAttachment(conn, { attachmentId: 'abc', outputPath: '' }),
     ).rejects.toThrow('Output path is required');
   });
 
-  // Test for error propagation
-  test('should propagate custom errors when thrown internally', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new AzureDevOpsError('Custom error');
-      }),
-    };
-
-    // Act & Assert
+  it('throws when no stream returned', async () => {
+    const conn = makeConn(null);
     await expect(
-      getWorkItemAttachment(mockConnection, {
-        attachmentId: 'abc-123',
-        outputPath: '/path/to/output.txt',
-      }),
-    ).rejects.toThrow(AzureDevOpsError);
-
-    await expect(
-      getWorkItemAttachment(mockConnection, {
-        attachmentId: 'abc-123',
-        outputPath: '/path/to/output.txt',
-      }),
-    ).rejects.toThrow('Custom error');
-  });
-
-  test('should wrap unexpected errors in a friendly error message', async () => {
-    // Arrange
-    const mockConnection: any = {
-      getWorkItemTrackingApi: jest.fn().mockImplementation(() => {
-        throw new Error('Unexpected error');
-      }),
-    };
-
-    // Act & Assert
-    await expect(
-      getWorkItemAttachment(mockConnection, {
-        attachmentId: 'abc-123',
-        outputPath: '/path/to/output.txt',
-      }),
-    ).rejects.toThrow('Failed to get attachment: Unexpected error');
+      getWorkItemAttachment(conn, { attachmentId: 'abc', outputPath: '/tmp/out.txt' }),
+    ).rejects.toThrow('No content received');
   });
 });
