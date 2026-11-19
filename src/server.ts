@@ -78,6 +78,16 @@ import {
   isServiceConnectionsRequest,
   handleServiceConnectionsRequest,
 } from './features/service-connections';
+import {
+  buildsTools,
+  isBuildsRequest,
+  handleBuildsRequest,
+} from './features/builds';
+import {
+  agentsTools,
+  isAgentsRequest,
+  handleAgentsRequest,
+} from './features/agents';
 
 // Create a safe console logging function that won't interfere with MCP protocol
 function safeLog(message: string) {
@@ -155,6 +165,8 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
       ...environmentsTools,
       ...librariesTools,
       ...serviceConnectionsTools,
+      ...buildsTools,
+      ...agentsTools,
     ];
 
     if (config.readOnly) {
@@ -376,6 +388,14 @@ export function createAzureDevOpsServer(config: AzureDevOpsConfig): Server {
 
       if (isServiceConnectionsRequest(request)) {
         return await handleServiceConnectionsRequest(connection, request);
+      }
+
+      if (isBuildsRequest(request)) {
+        return await handleBuildsRequest(connection, request);
+      }
+
+      if (isAgentsRequest(request)) {
+        return await handleAgentsRequest(connection, request);
       }
 
       // If we get here, the tool is not recognized by any feature handler

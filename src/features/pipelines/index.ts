@@ -13,6 +13,12 @@ export * from './trigger-pipeline';
 export * from './get-pipeline-run-yaml';
 export * from './get-pipeline-run-sources';
 export * from './get-pipeline-run-stage-tasks';
+export * from './get-pipeline-definition';
+export * from './get-pipeline-yaml';
+export * from './get-pipeline-template';
+export * from './get-variable-groups';
+export * from './get-pipeline-resources';
+export * from './get-agent-pool-details';
 
 // Export tool definitions
 export * from './tool-definitions';
@@ -45,6 +51,18 @@ import { GetPipelineRunSourcesSchema } from './get-pipeline-run-sources/schema';
 import { getPipelineRunSources } from './get-pipeline-run-sources/feature';
 import { GetPipelineRunStageTasksSchema } from './get-pipeline-run-stage-tasks/schema';
 import { getPipelineRunStageTasks } from './get-pipeline-run-stage-tasks/feature';
+import { GetPipelineDefinitionSchema } from './get-pipeline-definition/schema';
+import { getPipelineDefinition } from './get-pipeline-definition/feature';
+import { GetPipelineYamlSchema } from './get-pipeline-yaml/schema';
+import { getPipelineYaml } from './get-pipeline-yaml/feature';
+import { GetPipelineTemplateSchema } from './get-pipeline-template/schema';
+import { getPipelineTemplate } from './get-pipeline-template/feature';
+import { GetVariableGroupsSchema } from './get-variable-groups/schema';
+import { getVariableGroups } from './get-variable-groups/feature';
+import { GetPipelineResourcesSchema } from './get-pipeline-resources/schema';
+import { getPipelineResources } from './get-pipeline-resources/feature';
+import { GetAgentPoolDetailsSchema } from './get-agent-pool-details/schema';
+import { getAgentPoolDetails } from './get-agent-pool-details/feature';
 
 /**
  * Checks if the request is for the pipelines feature
@@ -65,6 +83,12 @@ export const isPipelinesRequest: RequestIdentifier = (
     'get_pipeline_run_yaml',
     'get_pipeline_run_sources',
     'get_pipeline_run_stage_tasks',
+    'get_pipeline_definition',
+    'get_pipeline_yaml',
+    'get_pipeline_template',
+    'get_variable_groups',
+    'get_pipeline_resources',
+    'get_agent_pool_details',
   ].includes(toolName);
 };
 
@@ -204,6 +228,71 @@ export const handlePipelinesRequest: RequestHandler = async (
         ...args,
         projectId: args.projectId,
       });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_pipeline_definition': {
+      const args = GetPipelineDefinitionSchema.parse(request.params.arguments);
+      const result = await getPipelineDefinition(
+        connection,
+        args.projectId,
+        args.definitionId,
+        args.revision,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_pipeline_yaml': {
+      const args = GetPipelineYamlSchema.parse(request.params.arguments);
+      const result = await getPipelineYaml(connection, args.projectId, args.definitionId);
+      if (result.content !== undefined) {
+        return { content: [{ type: 'text', text: result.content }] };
+      }
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+    }
+    case 'get_pipeline_template': {
+      const args = GetPipelineTemplateSchema.parse(request.params.arguments);
+      const result = await getPipelineTemplate(
+        connection,
+        args.projectId,
+        args.repositoryId,
+        args.templatePath,
+        args.branchName,
+      );
+      return { content: [{ type: 'text', text: result.content }] };
+    }
+    case 'get_variable_groups': {
+      const args = GetVariableGroupsSchema.parse(request.params.arguments);
+      const result = await getVariableGroups(
+        connection,
+        args.projectId,
+        args.groupName,
+        args.top,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_pipeline_resources': {
+      const args = GetPipelineResourcesSchema.parse(request.params.arguments);
+      const result = await getPipelineResources(
+        connection,
+        args.projectId,
+        args.definitionId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_agent_pool_details': {
+      const args = GetAgentPoolDetailsSchema.parse(request.params.arguments);
+      const result = await getAgentPoolDetails(
+        connection,
+        args.projectId,
+        args.definitionId,
+      );
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

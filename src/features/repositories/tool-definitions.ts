@@ -13,6 +13,10 @@ import {
 } from './schemas';
 import { ListBranchesSchema } from './list-branches/schema';
 import { ListTagsSchema } from './list-tags/schema';
+import { GetCommitDetailsSchema } from './get-commit-details/schema';
+import { GetCommitDiffSchema } from './get-commit-diff/schema';
+import { GetRepositoryFileSchema } from './get-repository-file/schema';
+import { GetFileHistorySchema } from './get-file-history/schema';
 
 /**
  * List of repositories tools
@@ -114,5 +118,25 @@ export const repositoriesTools: ToolDefinition[] = [
     name: 'list_tags',
     description: 'List tags in a repository with optional prefix filter',
     inputSchema: toJsonSchema(ListTagsSchema),
+  },
+  {
+    name: 'get_commit_details',
+    description: 'Retrieves commit metadata, author, message, and timestamp for a specific commit',
+    inputSchema: toJsonSchema(GetCommitDetailsSchema),
+  },
+  {
+    name: 'get_commit_diff',
+    description: 'Retrieves the list of file changes (paths and change types) introduced by a specific commit',
+    inputSchema: toJsonSchema(GetCommitDiffSchema),
+  },
+  {
+    name: 'get_repository_file',
+    description: 'Retrieves a repository file at a specific commit, branch, or tag',
+    inputSchema: toJsonSchema(GetRepositoryFileSchema),
+  },
+  {
+    name: 'get_file_history',
+    description: 'Retrieves the commit history of a specific repository file',
+    inputSchema: toJsonSchema(GetFileHistorySchema),
   },
 ];

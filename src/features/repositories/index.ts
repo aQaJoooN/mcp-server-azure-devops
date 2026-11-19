@@ -14,6 +14,10 @@ export * from './create-commit';
 export * from './list-commits';
 export * from './list-branches';
 export * from './list-tags';
+export * from './get-commit-details';
+export * from './get-commit-diff';
+export * from './get-repository-file';
+export * from './get-file-history';
 
 // Export tool definitions
 export * from './tool-definitions';
@@ -52,6 +56,14 @@ import { ListBranchesSchema } from './list-branches/schema';
 import { listBranches } from './list-branches/feature';
 import { ListTagsSchema } from './list-tags/schema';
 import { listTags } from './list-tags/feature';
+import { GetCommitDetailsSchema } from './get-commit-details/schema';
+import { getCommitDetails } from './get-commit-details/feature';
+import { GetCommitDiffSchema } from './get-commit-diff/schema';
+import { getCommitDiff } from './get-commit-diff/feature';
+import { GetRepositoryFileSchema } from './get-repository-file/schema';
+import { getRepositoryFile } from './get-repository-file/feature';
+import { GetFileHistorySchema } from './get-file-history/schema';
+import { getFileHistory } from './get-file-history/feature';
 
 /**
  * Checks if the request is for the repositories feature
@@ -72,6 +84,10 @@ export const isRepositoriesRequest: RequestIdentifier = (
     'list_commits',
     'list_branches',
     'list_tags',
+    'get_commit_details',
+    'get_commit_diff',
+    'get_repository_file',
+    'get_file_history',
   ].includes(toolName);
 };
 
@@ -231,6 +247,58 @@ export const handleRepositoriesRequest: RequestHandler = async (
         ...args,
         projectId: args.projectId,
       });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_commit_details': {
+      const args = GetCommitDetailsSchema.parse(request.params.arguments);
+      const result = await getCommitDetails(
+        connection,
+        args.projectId,
+        args.repositoryId,
+        args.commitId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_commit_diff': {
+      const args = GetCommitDiffSchema.parse(request.params.arguments);
+      const result = await getCommitDiff(
+        connection,
+        args.projectId,
+        args.repositoryId,
+        args.commitId,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_repository_file': {
+      const args = GetRepositoryFileSchema.parse(request.params.arguments);
+      const result = await getRepositoryFile(
+        connection,
+        args.projectId,
+        args.repositoryId,
+        args.path,
+        args.version,
+        args.versionType,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_file_history': {
+      const args = GetFileHistorySchema.parse(request.params.arguments);
+      const result = await getFileHistory(
+        connection,
+        args.projectId,
+        args.repositoryId,
+        args.path,
+        args.top,
+        args.branchName,
+      );
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
