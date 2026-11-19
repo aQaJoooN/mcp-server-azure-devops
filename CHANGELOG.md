@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.3](https://github.com/aQaJoooN/mcp-server-azure-devops/compare/mcp-server-azure-devops-v0.2.2...mcp-server-azure-devops-v0.2.3) (2026-11-19)
+
+
+### Features
+
+* add build, agent, pipeline, and repository investigation tools ([27ccac5](https://github.com/aQaJoooN/mcp-server-azure-devops/commit/27ccac5b6c3475fba5bca699de0005f385c92626))
+
+
+### Bug Fixes
+
+* remove unused imports and variables flagged by oxlint ([fa39739](https://github.com/aQaJoooN/mcp-server-azure-devops/commit/fa39739c80464e619fa1193443af70b303788566))
+
 ## [0.2.2](https://github.com/aQaJoooN/mcp-server-azure-devops/compare/mcp-server-azure-devops-v0.2.1...mcp-server-azure-devops-v0.2.2) (2026-11-18)
 
 
