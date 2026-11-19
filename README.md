@@ -20,10 +20,15 @@ The server is structured around the Model Context Protocol (MCP) for communicati
 
 - Projects
 - Work Items
-- Repositories
+- Repositories (including commit details, diffs, file history)
 - Pull Requests
 - Branches
-- Pipelines
+- Pipelines (including definitions, YAML, variable groups, resources)
+- Builds (status, timeline, failed tasks, logs, comparison, search)
+- Agents (details, capabilities, job history, pool status, image version)
+- Wikis
+- Search (code, wiki, work items)
+- Service Connections
 
 ### Core Components
 
@@ -245,6 +250,10 @@ For full documentation see [docs/tools/README.md](./docs/tools/README.md).
 - `list_commits` — list commits on a branch
 - `create_branch` — create a branch from an existing one
 - `create_commit` — commit file changes via unified diff or search/replace
+- `get_commit_details` — get commit metadata, author, message, and timestamp
+- `get_commit_diff` — get the list of file changes introduced by a commit
+- `get_repository_file` — retrieve a file at a specific branch, commit, or tag
+- `get_file_history` — get the commit history of a specific file
 
 ### Pull Request Tools
 - `create_pull_request` — create a new PR
@@ -280,6 +289,32 @@ For full documentation see [docs/tools/README.md](./docs/tools/README.md).
 - `get_pipeline_run_yaml` — resolve the full YAML including all templates
 - `get_pipeline_run_sources` — source repos, branches, and commit versions used in a run
 - `get_pipeline_run_stage_tasks` — task hierarchy with logIds per stage/job
+- `get_pipeline_definition` — get pipeline definition settings and configuration
+- `get_pipeline_yaml` — retrieve the main pipeline YAML from the repository
+- `get_pipeline_template` — retrieve a YAML template file referenced by a pipeline
+- `get_variable_groups` — get variable group metadata with secrets masked
+- `get_pipeline_resources` — get pipeline resource dependencies (repositories, pipelines)
+- `get_agent_pool_details` — get agent pool configuration for a pipeline definition
+
+### Build Tools
+- `get_build_details` — get build status, branch, commit, and definition details
+- `get_build_timeline` — get the execution timeline of stages, jobs, and tasks
+- `get_failed_tasks` — identify failed and canceled tasks in a build
+- `get_task_log` — retrieve logs for a specific task by log ID
+- `get_build_logs` — list all available build log entries
+- `compare_builds` — compare two builds to find differences
+- `get_build_changes` — get source code changes associated with a build
+- `search_failed_builds` — search historical failed builds with filters
+- `get_last_successful_build` — get the most recent successful build for a pipeline
+- `compare_failed_successful_builds` — compare a failed build against the last successful one
+
+### Agent Tools
+- `get_agent_details` — get agent information, status, and configuration
+- `get_agent_capabilities` — get installed tools, software versions, and capabilities
+- `get_agent_job_history` — get historical jobs executed by an agent
+- `get_agent_pool_status` — get pool availability, capacity, and operational status
+- `get_agent_image_version` — get container image name, tag, and version for k8s agents
+- `get_agent_environment_summary` — get a sanitized agent environment summary (secrets excluded)
 
 ### Infrastructure Tools
 - `list_environments` — list deployment environments (approval gates, Kubernetes, VMs)

@@ -608,3 +608,173 @@ Commits multiple file changes to a branch, supporting additions, modifications, 
 ### Response
 
 Returns the commit ID after applying the changes.
+
+## get_commit_details
+
+Retrieves commit metadata, author, message, and timestamp for a specific commit.
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                          |
+| ------------- | ------ | -------- | ------------------------------------ |
+| `projectId`   | string | Yes      | The ID or name of the project        |
+| `repositoryId`| string | Yes      | The ID or name of the repository     |
+| `commitId`    | string | Yes      | The full SHA of the commit           |
+
+### Response
+
+Returns the Git commit object with metadata:
+
+```json
+{
+  "commitId": "abc123def456",
+  "comment": "fix: handle null reference in parser",
+  "author": {
+    "name": "Alice",
+    "email": "alice@test.com",
+    "date": "2024-01-01T10:00:00Z"
+  },
+  "committer": {
+    "name": "Alice",
+    "email": "alice@test.com",
+    "date": "2024-01-01T10:01:00Z"
+  },
+  "parents": ["parent123"],
+  "url": "https://ado/project/_git/repo/commit/abc123"
+}
+```
+
+### Example
+
+```javascript
+const commit = await callTool('get_commit_details', {
+  projectId: 'my-project',
+  repositoryId: 'my-repo',
+  commitId: 'abc123def456',
+});
+```
+
+## get_commit_diff
+
+Retrieves the list of file changes (paths and change types) introduced by a specific commit.
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                          |
+| ------------- | ------ | -------- | ------------------------------------ |
+| `projectId`   | string | Yes      | The ID or name of the project        |
+| `repositoryId`| string | Yes      | The ID or name of the repository     |
+| `commitId`    | string | Yes      | The full SHA of the commit           |
+
+### Response
+
+Returns the commit ID and an array of changed files with their change types:
+
+```json
+{
+  "commitId": "abc123",
+  "changes": [
+    { "path": "/src/app.ts", "changeType": "edit" },
+    { "path": "/src/old.ts", "originalPath": "/src/old.ts", "changeType": "rename" },
+    { "path": "/src/new.ts", "changeType": "add" }
+  ]
+}
+```
+
+### Example
+
+```javascript
+const diff = await callTool('get_commit_diff', {
+  projectId: 'my-project',
+  repositoryId: 'my-repo',
+  commitId: 'abc123',
+});
+```
+
+## get_repository_file
+
+Retrieves a repository file at a specific commit, branch, or tag. Delegates to the existing `get_file_content` implementation with a version descriptor.
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                                        |
+| ------------- | ------ | -------- | -------------------------------------------------- |
+| `projectId`   | string | Yes      | The ID or name of the project                      |
+| `repositoryId`| string | Yes      | The ID or name of the repository                   |
+| `path`        | string | Yes      | The path to the file (e.g. `/src/index.ts`)        |
+| `version`     | string | No       | Commit SHA or branch/tag name to retrieve the file at |
+| `versionType` | enum   | No       | `branch` (default), `commit`, or `tag`              |
+
+### Response
+
+Returns a `FileContentResponse` object:
+
+```json
+{
+  "content": "export const x = 1;\n",
+  "isDirectory": false
+}
+```
+
+### Example
+
+```javascript
+// Get a file at a specific commit
+const file = await callTool('get_repository_file', {
+  projectId: 'my-project',
+  repositoryId: 'my-repo',
+  path: '/src/app.ts',
+  version: 'abc123def456',
+  versionType: 'commit',
+});
+
+// Get a file from a branch
+const file2 = await callTool('get_repository_file', {
+  projectId: 'my-project',
+  repositoryId: 'my-repo',
+  path: '/src/app.ts',
+  version: 'feature-branch',
+  versionType: 'branch',
+});
+```
+
+## get_file_history
+
+Retrieves the commit history of a specific repository file, showing which commits touched a given path.
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                                          |
+| ------------- | ------ | -------- | ---------------------------------------------------- |
+| `projectId`   | string | Yes      | The ID or name of the project                        |
+| `repositoryId`| string | Yes      | The ID or name of the repository                     |
+| `path`        | string | Yes      | The path to the file (e.g. `/src/index.ts`)          |
+| `top`         | number | No       | Maximum number of commits to return (default 20, max 100) |
+| `branchName`  | string | No       | Branch to search commits on (defaults to repo default) |
+
+### Response
+
+Returns an array of commit entries:
+
+```json
+[
+  {
+    "commitId": "abc123",
+    "comment": "update file",
+    "author": { "name": "Alice", "email": "alice@test.com", "date": "2024-01-01T00:00:00.000Z" },
+    "url": "https://ado/project/_git/repo/commit/abc123"
+  }
+]
+```
+
+### Example
+
+```javascript
+const history = await callTool('get_file_history', {
+  projectId: 'my-project',
+  repositoryId: 'my-repo',
+  path: '/src/app.ts',
+  top: 20,
+  branchName: 'main',
+});
+```

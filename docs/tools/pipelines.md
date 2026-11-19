@@ -12,6 +12,12 @@ This document describes the tools available for working with Azure DevOps pipeli
 - [`pipeline_timeline`](#pipeline_timeline) - Retrieve the stage and job timeline for a run
 - [`get_pipeline_log`](#get_pipeline_log) - Retrieve raw or JSON-formatted log content
 - [`trigger_pipeline`](#trigger_pipeline) - Trigger a pipeline run
+- [`get_pipeline_definition`](#get_pipeline_definition) - Get pipeline definition settings and configuration
+- [`get_pipeline_yaml`](#get_pipeline_yaml) - Retrieve the main pipeline YAML from the repository
+- [`get_pipeline_template`](#get_pipeline_template) - Retrieve a YAML template file referenced by a pipeline
+- [`get_variable_groups`](#get_variable_groups) - Get variable group metadata with secrets masked
+- [`get_pipeline_resources`](#get_pipeline_resources) - Get pipeline resource dependencies
+- [`get_agent_pool_details`](#get_agent_pool_details) - Get agent pool configuration for a pipeline
 
 ## list_pipelines
 
@@ -528,5 +534,216 @@ const runWithOptions = await callTool('trigger_pipeline', {
       isSecret: false,
     },
   },
+});
+```
+
+## get_pipeline_definition
+
+Retrieves pipeline definition settings and configuration (name, path, process, repository, triggers, variables, options).
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                            |
+| -------------- | ------ | -------- | -------------------------------------- |
+| `projectId`    | string | Yes      | The ID or name of the project           |
+| `definitionId` | number | Yes      | The pipeline definition ID              |
+| `revision`     | number | No       | Specific revision to retrieve          |
+
+### Response
+
+Returns the full definition object from the Build API:
+
+```json
+{
+  "id": 10,
+  "name": "CI Build",
+  "path": "\\",
+  "type": 2,
+  "process": { "yamlFilename": "azure-pipelines.yml" },
+  "repository": { "id": "repo-guid", "name": "MyRepo", "type": "TfsGit" },
+  "triggers": [],
+  "options": []
+}
+```
+
+### Example
+
+```javascript
+const def = await callTool('get_pipeline_definition', {
+  projectId: 'my-project',
+  definitionId: 10,
+});
+```
+
+## get_pipeline_yaml
+
+Retrieves the main pipeline YAML configuration from the repository linked to the pipeline definition. It fetches the definition, extracts the YAML path, and streams the file content.
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                  |
+| -------------- | ------ | -------- | ---------------------------- |
+| `projectId`    | string | Yes      | The ID or name of the project|
+| `definitionId` | number | Yes      | The pipeline definition ID   |
+
+### Response
+
+When the YAML is found, returns the raw file content as plain text. When the definition has no YAML path (e.g., a classic pipeline), returns JSON with an error field:
+
+```json
+{
+  "definitionId": 10,
+  "repositoryId": "repo-guid",
+  "error": "No YAML file path found in pipeline definition (may be a classic pipeline)"
+}
+```
+
+### Example
+
+```javascript
+const yaml = await callTool('get_pipeline_yaml', {
+  projectId: 'my-project',
+  definitionId: 10,
+});
+```
+
+## get_pipeline_template
+
+Retrieves a YAML template file referenced by a pipeline from any repository at a given branch.
+
+### Parameters
+
+| Parameter       | Type   | Required | Description                                          |
+| -------------- | ------ | -------- | ---------------------------------------------------- |
+| `projectId`    | string | Yes      | The ID or name of the project                        |
+| `repositoryId`  | string | Yes      | The ID or name of the repo containing the template   |
+| `templatePath`  | string | Yes      | Path to the template file (e.g. `templates/job.yml`) |
+| `branchName`   | string | No       | Branch to retrieve from (default: `main`)           |
+
+### Response
+
+Returns the template file content as plain text.
+
+### Example
+
+```javascript
+const template = await callTool('get_pipeline_template', {
+  projectId: 'my-project',
+  repositoryId: 'my-repo',
+  templatePath: 'templates/build.yml',
+  branchName: 'main',
+});
+```
+
+## get_variable_groups
+
+Retrieves variable group metadata and configuration. Secret variable values are masked as `<secret>`.
+
+### Parameters
+
+| Parameter   | Type   | Required | Description                                    |
+| ----------- | ------ | -------- | ---------------------------------------------- |
+| `projectId` | string | Yes      | The ID or name of the project                   |
+| `groupName` | string | No       | Optional filter by variable group name          |
+| `top`       | number | No       | Maximum number of groups to return (default 50) |
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "name": "SharedVars",
+    "variables": {
+      "MY_VAR": { "value": "hello", "isSecret": false },
+      "SECRET_VAR": { "value": "<secret>", "isSecret": true }
+    }
+  }
+]
+```
+
+### Example
+
+```javascript
+const groups = await callTool('get_variable_groups', {
+  projectId: 'my-project',
+  groupName: 'SharedVars',
+});
+```
+
+## get_pipeline_resources
+
+Retrieves pipeline resource dependencies, including the primary repository and declared pipeline resources.
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                  |
+| -------------- | ------ | -------- | ---------------------------- |
+| `projectId`    | string | Yes      | The ID or name of the project|
+| `definitionId` | number | Yes      | The pipeline definition ID   |
+
+### Response
+
+```json
+{
+  "definitionId": 10,
+  "name": "CI Pipeline",
+  "primaryRepository": {
+    "id": "repo-guid",
+    "name": "MyRepo",
+    "type": "TfsGit",
+    "defaultBranch": "main"
+  },
+  "resources": {
+    "repositories": [{ "alias": "templates", "type": "git" }],
+    "pipelines": [{ "pipeline": "upstream" }]
+  }
+}
+```
+
+### Example
+
+```javascript
+const resources = await callTool('get_pipeline_resources', {
+  projectId: 'my-project',
+  definitionId: 10,
+});
+```
+
+## get_agent_pool_details
+
+Retrieves the agent pool configuration associated with a pipeline definition. Fetches the build definition to find the queue, then resolves the pool details.
+
+### Parameters
+
+| Parameter      | Type   | Required | Description                  |
+| -------------- | ------ | -------- | ---------------------------- |
+| `projectId`    | string | Yes      | The ID or name of the project|
+| `definitionId` | number | Yes      | The pipeline definition ID   |
+
+### Response
+
+```json
+{
+  "definitionId": 10,
+  "queue": { "id": 5, "name": "Default" },
+  "pool": {
+    "id": 5,
+    "name": "Default",
+    "size": 3,
+    "isHosted": false,
+    "poolType": "automation"
+  }
+}
+```
+
+When the definition has no queue ID, the `pool` field is omitted.
+
+### Example
+
+```javascript
+const pool = await callTool('get_agent_pool_details', {
+  projectId: 'my-project',
+  definitionId: 10,
 });
 ```

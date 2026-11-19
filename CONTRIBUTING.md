@@ -35,18 +35,18 @@ The server is organized into feature-specific modules:
 ```
 src/
  └── features/
-     ├── environments/      (list_environments)
-     ├── libraries/         (list_libraries)
-     ├── organizations/
-     ├── pipelines/
-     ├── projects/
-     ├── pull-requests/
-     ├── repositories/
-     ├── search/
+     ├── agents/             (get_agent_details, get_agent_capabilities, get_agent_job_history, get_agent_pool_status, get_agent_image_version, get_agent_environment_summary)
+     ├── builds/             (get_build_details, get_build_timeline, get_failed_tasks, get_task_log, get_build_logs, compare_builds, get_build_changes, search_failed_builds, get_last_successful_build, compare_failed_successful_builds)
+     ├── environments/       (list_environments)
+     ├── libraries/          (list_libraries)
+     ├── pipelines/          (list_pipelines, get_pipeline, trigger_pipeline, pipeline_timeline, get_pipeline_log, get_pipeline_definition, get_pipeline_yaml, get_pipeline_template, get_variable_groups, get_pipeline_resources, get_agent_pool_details, ...)
+     ├── projects/           (list_projects, get_project, get_project_details)
+     ├── pull-requests/      (create/get/list pull requests, comments, checks, changes, updates)
+     ├── repositories/       (list_repositories, get_repository, get_file_content, create_branch, create_commit, list_commits, list_branches, list_tags, get_commit_details, get_commit_diff, get_repository_file, get_file_history, ...)
+     ├── search/             (search_code, search_wiki, search_work_items)
      ├── service-connections/ (list_service_connections)
-     ├── users/
-     ├── wikis/
-     └── work-items/
+     ├── wikis/              (get_wikis, create_wiki, get/create/update_wiki_page, list_wiki_pages)
+     └── work-items/        (get/create/update/list_work_item, comments, attachments, links)
 ```
 
 Each feature module:
@@ -58,9 +58,10 @@ Each feature module:
 
 When adding a new feature or tool:
 1. Create a new directory under `src/features/` if needed
-2. Implement your tool functions
+2. Implement your tool functions (schema, feature, index per tool)
 3. Update the feature's `index.ts` to export your functions and add them to the request handlers
-4. No changes to server.ts should be needed!
+4. Update the feature's `tool-definitions.ts` with the new tool entry
+5. If a **new feature area** (new top-level directory), also import and wire it in `src/server.ts` (add to the imports, the `tools` array in `ListToolsRequestSchema`, and the routing in `CallToolRequestSchema`)
 
 ## Local Setup (run the server from source)
 

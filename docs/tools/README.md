@@ -6,10 +6,12 @@ This directory documents every tool available in the server. Each page covers pa
 
 - [Core Navigation](./core-navigation.md) — hierarchy overview and discovery workflow
 - [Projects](./projects.md) — `list_projects`, `get_project`, `get_project_details`
-- [Repositories](./repositories.md) — `list_repositories`, `get_repository`, `get_file_content`, `create_branch`, `create_commit`, `list_commits`, `list_branches`, `list_tags`, tree tools
+- [Repositories](./repositories.md) — `list_repositories`, `get_repository`, `get_file_content`, `create_branch`, `create_commit`, `list_commits`, `list_branches`, `list_tags`, tree tools, `get_commit_details`, `get_commit_diff`, `get_repository_file`, `get_file_history`
 - [Pull Requests](./pull-requests.md) — create, get, list, comment, update, checks, changes
 - [Work Items](./work-items.md) — get, create, update, list, comments, attachments, links
-- [Pipelines](./pipelines.md) — list, get, trigger, runs, logs, timeline, YAML, artifacts
+- [Pipelines](./pipelines.md) — list, get, trigger, runs, logs, timeline, YAML, artifacts, definition, variable groups, resources, agent pool
+- [Builds](./builds.md) — build details, timeline, failed tasks, logs, changes, comparison, search
+- [Agents](./agents.md) — agent details, capabilities, job history, pool status, image version, environment summary
 - [Wikis](./wiki.md) — get, create, list pages, get/update/create page
 - [Search](./search.md) — `search_code`, `search_wiki`, `search_work_items`
 - [Resource URIs](./resources.md) — accessing repository content via `ado://` URIs
@@ -37,6 +39,10 @@ When the server is started with `MCP_READ_ONLY=true`, all write tools are remove
 - [`list_commits`](./repositories.md#list_commits) — list commits on a branch
 - [`list_branches`](./repositories.md#list_branches) — list branches with optional filter
 - [`list_tags`](./repositories.md#list_tags) — list tags with optional filter
+- [`get_commit_details`](./repositories.md#get_commit_details) — get commit metadata, author, message, and timestamp
+- [`get_commit_diff`](./repositories.md#get_commit_diff) — get the list of file changes introduced by a commit
+- [`get_repository_file`](./repositories.md#get_repository_file) — retrieve a file at a specific branch, commit, or tag
+- [`get_file_history`](./repositories.md#get_file_history) — get the commit history of a specific file
 
 ### Pull Request Tools
 - [`create_pull_request`](./pull-requests.md#create_pull_request) ✎ write — create a new PR
@@ -72,6 +78,32 @@ When the server is started with `MCP_READ_ONLY=true`, all write tools are remove
 - [`get_pipeline_run_yaml`](./pipelines.md#get_pipeline_run_yaml) — resolve the full YAML including templates
 - [`get_pipeline_run_sources`](./pipelines.md#get_pipeline_run_sources) — get source repositories used in a run
 - [`get_pipeline_run_stage_tasks`](./pipelines.md#get_pipeline_run_stage_tasks) — get task details per stage/job
+- [`get_pipeline_definition`](./pipelines.md#get_pipeline_definition) — get pipeline definition settings and configuration
+- [`get_pipeline_yaml`](./pipelines.md#get_pipeline_yaml) — retrieve the main pipeline YAML from the repository
+- [`get_pipeline_template`](./pipelines.md#get_pipeline_template) — retrieve a YAML template file referenced by a pipeline
+- [`get_variable_groups`](./pipelines.md#get_variable_groups) — get variable group metadata with secrets masked
+- [`get_pipeline_resources`](./pipelines.md#get_pipeline_resources) — get pipeline resource dependencies (repositories, pipelines)
+- [`get_agent_pool_details`](./pipelines.md#get_agent_pool_details) — get agent pool configuration for a pipeline definition
+
+### Build Tools
+- [`get_build_details`](./builds.md#get_build_details) — get build status, branch, commit, and definition details
+- [`get_build_timeline`](./builds.md#get_build_timeline) — get the execution timeline of stages, jobs, and tasks
+- [`get_failed_tasks`](./builds.md#get_failed_tasks) — identify failed and canceled tasks in a build
+- [`get_task_log`](./builds.md#get_task_log) — retrieve logs for a specific task by log ID
+- [`get_build_logs`](./builds.md#get_build_logs) — list all available build log entries
+- [`compare_builds`](./builds.md#compare_builds) — compare two builds to find differences
+- [`get_build_changes`](./builds.md#get_build_changes) — get source code changes associated with a build
+- [`search_failed_builds`](./builds.md#search_failed_builds) — search historical failed builds with filters
+- [`get_last_successful_build`](./builds.md#get_last_successful_build) — get the most recent successful build for a pipeline
+- [`compare_failed_successful_builds`](./builds.md#compare_failed_successful_builds) — compare a failed build against the last successful one
+
+### Agent Tools
+- [`get_agent_details`](./agents.md#get_agent_details) — get agent information, status, and configuration
+- [`get_agent_capabilities`](./agents.md#get_agent_capabilities) — get installed tools, software versions, and capabilities
+- [`get_agent_job_history`](./agents.md#get_agent_job_history) — get historical jobs executed by an agent
+- [`get_agent_pool_status`](./agents.md#get_agent_pool_status) — get pool availability, capacity, and operational status
+- [`get_agent_image_version`](./agents.md#get_agent_image_version) — get container image name, tag, and version for k8s agents
+- [`get_agent_environment_summary`](./agents.md#get_agent_environment_summary) — get a sanitized agent environment summary (secrets excluded)
 
 ### Wiki Tools
 - [`get_wikis`](./wiki.md#get_wikis) — list wikis in a project
@@ -90,6 +122,9 @@ When the server is started with `MCP_READ_ONLY=true`, all write tools are remove
 - [`list_environments`](./pipelines.md#list_environments) — list deployment environments
 - [`list_libraries`](./pipelines.md#list_libraries) — list variable groups (Libraries)
 - [`list_service_connections`](./pipelines.md#list_service_connections) — list service endpoints
+- [`get_variable_groups`](./pipelines.md#get_variable_groups) — get variable group metadata with secrets masked
+- [`get_agent_pool_details`](./pipelines.md#get_agent_pool_details) — get agent pool configuration for a pipeline definition
+- [`get_agent_pool_status`](./agents.md#get_agent_pool_status) — get agent pool availability and capacity
 
 ## Removed Tools
 

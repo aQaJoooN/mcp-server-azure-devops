@@ -37,6 +37,13 @@ The `AZURE_DEVOPS_DEFAULT_PROJECT` environment variable and `defaultProject` con
 
 ```
 src/features/
+  agents/               get_agent_details, get_agent_capabilities,
+                        get_agent_job_history, get_agent_pool_status,
+                        get_agent_image_version, get_agent_environment_summary
+  builds/               get_build_details, get_build_timeline, get_failed_tasks,
+                        get_task_log, get_build_logs, compare_builds,
+                        get_build_changes, search_failed_builds,
+                        get_last_successful_build, compare_failed_successful_builds
   environments/          list_environments
   libraries/             list_libraries
   pipelines/
@@ -51,12 +58,22 @@ src/features/
     pipeline-timeline/
     trigger-pipeline/
     download-pipeline-artifact/
+    get-pipeline-definition/      get_pipeline_definition
+    get-pipeline-yaml/           get_pipeline_yaml
+    get-pipeline-template/       get_pipeline_template
+    get-variable-groups/         get_variable_groups
+    get-pipeline-resources/      get_pipeline_resources
+    get-agent-pool-details/      get_agent_pool_details
   projects/
   pull-requests/
   repositories/
     list-branches/        list_branches
     list-commits/
     list-tags/            list_tags
+    get-commit-details/   get_commit_details
+    get-commit-diff/      get_commit_diff
+    get-repository-file/  get_repository_file
+    get-file-history/     get_file_history
     ... (other existing tools)
   search/
   service-connections/   list_service_connections
