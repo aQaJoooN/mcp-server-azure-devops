@@ -1,8 +1,5 @@
 import { WebApi } from 'azure-devops-node-api';
-import {
-  AzureDevOpsResourceNotFoundError,
-  AzureDevOpsError,
-} from '../../../shared/errors';
+import { AzureDevOpsResourceNotFoundError } from '../../../shared/errors';
 import { getPipelineYaml } from './feature';
 
 function makeStream(content: string) {

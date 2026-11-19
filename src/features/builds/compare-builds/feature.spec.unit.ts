@@ -1,8 +1,5 @@
 import { WebApi } from 'azure-devops-node-api';
-import {
-  AzureDevOpsResourceNotFoundError,
-  AzureDevOpsError,
-} from '../../../shared/errors';
+import { AzureDevOpsResourceNotFoundError } from '../../../shared/errors';
 import { compareBuilds } from './feature';
 
 function makeConn(build1: unknown, build2: unknown) {

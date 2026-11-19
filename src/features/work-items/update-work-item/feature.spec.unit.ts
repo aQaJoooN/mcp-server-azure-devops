@@ -1,8 +1,5 @@
 import { WebApi } from 'azure-devops-node-api';
-import {
-  AzureDevOpsResourceNotFoundError,
-  AzureDevOpsError,
-} from '../../../shared/errors';
+import { AzureDevOpsResourceNotFoundError } from '../../../shared/errors';
 import { updateWorkItem } from './feature';
 
 function makeWitApi(workItem: unknown = { id: 1 }, currentTags = '') {

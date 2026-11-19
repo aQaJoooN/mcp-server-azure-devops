@@ -1,8 +1,5 @@
 import { WebApi } from 'azure-devops-node-api';
-import {
-  AzureDevOpsResourceNotFoundError,
-  AzureDevOpsError,
-} from '../../../shared/errors';
+import { AzureDevOpsResourceNotFoundError } from '../../../shared/errors';
 import { getBuildChanges } from './feature';
 
 function makeConnection(statusCode: number, result: unknown) {
